@@ -1,6 +1,37 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
+
+
+# ─── AUTENTICAÇÃO ─────────────────────────────────────────────────────────────
+
+class UserRegister(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserLoginOut(BaseModel):
+    session_id: str
+    email: str
+    name: str
+
+class GoogleLogin(BaseModel):
+    token: str
+
+class ForgotPassword(BaseModel):
+    email: str
+
+class ResetPassword(BaseModel):
+    token: str
+    password: str
+
+class DeleteAccount(BaseModel):
+    session_id: str
+    password: str
 
 
 # ─── OPÇÕES ──────────────────────────────────────────────────────────────────
@@ -67,6 +98,15 @@ class ModuleProgressOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ─── CARREIRA DEFINITIVA / SELEÇÃO DE CARREIRAS ──────────────────────────────
+
+class DefinitiveCareerCreate(BaseModel):
+    career_id: int
+
+class CareerSelectionsCreate(BaseModel):
+    career_ids: list[int]
 
 
 # ─── CARREIRAS ───────────────────────────────────────────────────────────────

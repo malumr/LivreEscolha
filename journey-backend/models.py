@@ -4,6 +4,18 @@ from sqlalchemy.sql import func
 from database import Base
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from datetime import datetime, timezone
+
+
+class User(Base):
+    """Usuário cadastrado com email e senha."""
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class Module(Base):
@@ -54,8 +66,7 @@ class UserSession(Base):
     id = Column(String(100), primary_key=True)              # UUID do frontend
     created_at = Column(
     DateTime,
-    default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo"))
-)
+    default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
     DateTime,
     default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")),
@@ -96,6 +107,38 @@ class ModuleProgress(Base):
 
     session = relationship("UserSession", back_populates="progress")
     module = relationship("Module")
+
+
+class PasswordResetToken(Base):
+    """Token temporário para redefinição de senha (válido por 1 hora)."""
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), nullable=False, index=True)
+    token = Column(String(100), unique=True, nullable=False, index=True)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    used = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class DefinitiveCareer(Base):
+    """Carreira definitiva escolhida pelo usuário na Rota Definida."""
+    __tablename__ = "definitive_careers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(100), ForeignKey("user_sessions.id"), nullable=False, unique=True)
+    career_id = Column(Integer, ForeignKey("careers.id"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class CareerSelection(Base):
+    """Carreiras escolhidas pelo usuário no Horizonte Ampliado."""
+    __tablename__ = "career_selections"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(100), ForeignKey("user_sessions.id"), nullable=False, index=True)
+    career_id = Column(Integer, ForeignKey("careers.id"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class Career(Base):
