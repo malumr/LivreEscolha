@@ -1,0 +1,15 @@
+# Backend
+journey-backend/venv/
+journey-backend/__pycache__/
+journey-backend/*.pyc
+journey-backend/journey.db
+
+# Frontend
+journey-frontend/node_modules/
+journey-frontend/dist/
+
+# VS Code
+.vscode/
+
+# Env
+.env
