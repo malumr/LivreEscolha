@@ -31,6 +31,7 @@ def _cleanup_orphaned_data(db: Session, email: str):
     e = email.lower()
     db.query(models.CareerSelection).filter(models.CareerSelection.session_id == e).delete()
     db.query(models.DefinitiveCareer).filter(models.DefinitiveCareer.session_id == e).delete()
+    db.query(models.AdminRecommendation).filter(models.AdminRecommendation.session_id == e).delete()
     db.query(models.Answer).filter(models.Answer.session_id == e).delete()
     db.query(models.ModuleProgress).filter(models.ModuleProgress.session_id == e).delete()
     db.query(models.UserSession).filter(models.UserSession.id == e).delete()
@@ -245,6 +246,7 @@ def delete_user_account(db: Session, email: str, password: str) -> tuple[bool, s
     db.query(models.ModuleProgress).filter(models.ModuleProgress.session_id == email).delete()
     db.query(models.CareerSelection).filter(models.CareerSelection.session_id == email).delete()
     db.query(models.DefinitiveCareer).filter(models.DefinitiveCareer.session_id == email).delete()
+    db.query(models.AdminRecommendation).filter(models.AdminRecommendation.session_id == email).delete()
     db.query(models.UserSession).filter(models.UserSession.id == email).delete()
     db.query(models.PasswordResetToken).filter(models.PasswordResetToken.email == email.lower()).delete()
     db.delete(user)
@@ -286,3 +288,31 @@ def get_all_careers(db: Session) -> list[models.Career]:
 
 def get_career(db: Session, career_id: int) -> models.Career | None:
     return db.query(models.Career).filter(models.Career.id == career_id).first()
+
+
+# ─── RECOMENDAÇÃO DO ADMIN ───────────────────────────────────────────────────
+
+def save_admin_recommendation(db: Session, session_id: str, career_id: int, note: str = None):
+    existing = db.query(models.AdminRecommendation).filter(
+        models.AdminRecommendation.session_id == session_id
+    ).first()
+    if existing:
+        existing.career_id = career_id
+        existing.note = note
+        existing.updated_at = datetime.now(timezone.utc)
+    else:
+        db.add(models.AdminRecommendation(session_id=session_id, career_id=career_id, note=note))
+    db.commit()
+
+
+def get_admin_recommendation(db: Session, session_id: str) -> models.AdminRecommendation | None:
+    return db.query(models.AdminRecommendation).filter(
+        models.AdminRecommendation.session_id == session_id
+    ).first()
+
+
+def delete_admin_recommendation(db: Session, session_id: str):
+    db.query(models.AdminRecommendation).filter(
+        models.AdminRecommendation.session_id == session_id
+    ).delete()
+    db.commit()

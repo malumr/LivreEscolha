@@ -108,6 +108,10 @@ class DefinitiveCareerCreate(BaseModel):
 class CareerSelectionsCreate(BaseModel):
     career_ids: list[int]
 
+class AdminRecommendationCreate(BaseModel):
+    career_id: int
+    note: Optional[str] = None
+
 
 # ─── CARREIRAS ───────────────────────────────────────────────────────────────
 
@@ -118,6 +122,18 @@ class CareerOut(BaseModel):
     icon: Optional[str]
     icon_color: Optional[str]
     match_score: Optional[float] = 0.0
+    # Campos da planilha ATIVIDADE 4
+    campo_conhecimento:         Optional[str] = None
+    descricao_campo:            Optional[str] = None
+    areas_atuacao:              Optional[str] = None
+    tendencias_mercado:         Optional[str] = None
+    potencial_renda:            Optional[str] = None
+    requisitos_formacao:        Optional[str] = None
+    habilidades_essenciais:     Optional[str] = None
+    ambiente_trabalho:          Optional[str] = None
+    possibilidades_crescimento: Optional[str] = None
+    desafios_desvantagens:      Optional[str] = None
+    proximos_passos:            Optional[str] = None
 
     class Config:
         from_attributes = True

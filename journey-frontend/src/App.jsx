@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // ─── Substitua pelo seu Google Client ID ─────────────────────────────────────
 const GOOGLE_CLIENT_ID = "SEU_CLIENT_ID_AQUI.apps.googleusercontent.com";
@@ -45,6 +45,19 @@ const Icon = ({ name, size = 20 }) => {
     lock: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
     sparkles: <><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></>,
     "x": <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    "book-open": <><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></>,
+    "dollar-sign": <><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>,
+    home: <><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>,
+    "arrow-up": <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></>,
+    "alert-triangle": <><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,
+    "map-pin": <><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></>,
+    book: <><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></>,
+    users: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
+    leaf: <><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></>,
+    calculator: <><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/></>,
+    search: <><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
+    "chevron-down": <><polyline points="6 9 12 15 18 9"/></>,
+    filter: <><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></>,
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -63,6 +76,104 @@ const CAREER_ICONS = {
   "Engenheiro": "wrench",
   "Analista de Marketing": "trending-up",
 };
+
+// ─── MODAL DE CONFIRMAÇÃO ────────────────────────────────────────────────────
+function ConfirmModal({ title, body, warning, confirmLabel = "Confirmar e avançar", onConfirm, onCancel }) {
+  // Fecha ao clicar fora
+  return (
+    <div
+      onClick={onCancel}
+      style={{
+        position: "fixed", inset: 0, zIndex: 1000,
+        background: "rgba(15,23,42,0.55)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "1rem",
+        backdropFilter: "blur(3px)",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#fff", borderRadius: 20, padding: "2rem 1.75rem",
+          maxWidth: 420, width: "100%",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+          animation: "fadeUp 0.18s ease",
+        }}
+      >
+        {/* Ícone de aviso */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.25rem" }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: "50%",
+            background: "#fef9c3", display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Icon name="alert-triangle" size={26} style={{ color: "#ca8a04" }} />
+          </div>
+        </div>
+
+        <h2 style={{ textAlign: "center", fontSize: "1.15rem", fontWeight: 700, color: "#0f172a", margin: "0 0 0.625rem" }}>
+          {title}
+        </h2>
+        <p style={{ textAlign: "center", color: "#475569", fontSize: "0.9rem", lineHeight: 1.6, margin: "0 0 1rem" }}>
+          {body}
+        </p>
+
+        {/* Aviso de não volta */}
+        <div style={{
+          background: "#fff7ed", border: "1.5px solid #fed7aa",
+          borderRadius: 12, padding: "0.75rem 1rem",
+          marginBottom: "1.5rem",
+          display: "flex", gap: 10, alignItems: "flex-start",
+        }}>
+          <div style={{ color: "#ea580c", flexShrink: 0, marginTop: 1 }}>
+            <Icon name="alert-triangle" size={16} />
+          </div>
+          <p style={{ margin: 0, fontSize: "0.83rem", color: "#9a3412", lineHeight: 1.55 }}>
+            {warning}
+          </p>
+        </div>
+
+        {/* Botões */}
+        <div style={{ display: "flex", gap: "0.625rem" }}>
+          <button
+            onClick={onCancel}
+            style={{
+              flex: 1, padding: "0.8rem",
+              border: "1.5px solid #e2e8f0", borderRadius: 12,
+              background: "#fff", color: "#475569",
+              fontSize: "0.9rem", fontWeight: 500, cursor: "pointer",
+              fontFamily: font, transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#f8fafc"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "#fff"; }}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onConfirm}
+            style={{
+              flex: 2, padding: "0.8rem",
+              border: "none", borderRadius: 12,
+              background: "#0f172a", color: "#fff",
+              fontSize: "0.9rem", fontWeight: 600, cursor: "pointer",
+              fontFamily: font, transition: "opacity 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(16px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)   scale(1);    }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 // ─── BASE STYLES ─────────────────────────────────────────────────────────────
 const bg = "linear-gradient(160deg, #eef2ff 0%, #f0f4ff 50%, #e8eeff 100%)";
@@ -461,7 +572,7 @@ function BemVindoScreen({ onStart }) {
 }
 
 // ─── SCREEN: SUA JORNADA ─────────────────────────────────────────────────────
-function JornadaScreen({ onStart, progress, onDashboard, onProgress }) {
+function JornadaScreen({ onStart, progress, onDashboard, onProgress, adminRecommendation }) {
   const SLUGS = ["mapa-interior", "horizonte-ampliado", "rota-definida", "plano-de-voo"];
   const ICONS_MAP = { "mapa-interior": "compass", "horizonte-ampliado": "eye", "rota-definida": "route", "plano-de-voo": "plane" };
   const DESCS = { "mapa-interior": "Descubra mais sobre você", "horizonte-ampliado": "Explore possibilidades de carreira", "rota-definida": "Identifique caminhos ideais", "plano-de-voo": "Planeje seus próximos passos" };
@@ -478,7 +589,7 @@ function JornadaScreen({ onStart, progress, onDashboard, onProgress }) {
       <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.4rem)", fontWeight: "700", color: "#0f172a", margin: "0 0 0.5rem", letterSpacing: "-0.03em" }}>
         Sua jornada
       </h1>
-      <p style={{ color: "#64748b", margin: "0 0 2.5rem" }}>Acompanhe as etapas do seu desenvolvimento</p>
+      <p style={{ color: "#64748b", margin: "0 0 2rem" }}>Acompanhe as etapas do seu desenvolvimento</p>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem", width: "100%", maxWidth: 860 }}>
         {progress.map(mod => {
@@ -885,9 +996,16 @@ function MapaInteriorScreen({ onBack, onComplete, sessionId, onHome }) {
 }
 
 // ─── SCREEN: HORIZONTE AMPLIADO ──────────────────────────────────────────────
-function HorizonteScreen({ onBack, onCareerDetail, onContinue, selectedCareers, sessionId, onHome }) {
-  const [careers, setCareers] = useState([]);
-  const [loading, setLoading] = useState(true);
+const PAGE_SIZE = 8; // quantos cards mostrar por vez
+
+function HorizonteScreen({ onBack, onCareerDetail, onContinue, selectedCareers, sessionId, onHome, adminRecommendation }) {
+  const [careers, setCareers]         = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [search, setSearch]           = useState("");
+  const [filterField, setFilterField] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [confirming, setConfirming]   = useState(false);
 
   useEffect(() => {
     const sid = encodeURIComponent(sessionId);
@@ -897,56 +1015,338 @@ function HorizonteScreen({ onBack, onCareerDetail, onContinue, selectedCareers, 
       .finally(() => setLoading(false));
   }, [sessionId]);
 
+  // Ao mudar busca ou filtro, volta para a primeira "página"
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, filterField]);
+
+  // Lista de campos únicos
+  const campos = useMemo(() => {
+    const seen = new Set();
+    return careers.map(c => c.campo_conhecimento).filter(v => v && !seen.has(v) && seen.add(v)).sort();
+  }, [careers]);
+
+  // Carreiras filtradas
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return careers.filter(c => {
+      const matchField = !filterField || c.campo_conhecimento === filterField;
+      const matchSearch = !q ||
+        c.title.toLowerCase().includes(q) ||
+        (c.description || "").toLowerCase().includes(q) ||
+        (c.campo_conhecimento || "").toLowerCase().includes(q);
+      return matchField && matchSearch;
+    });
+  }, [careers, search, filterField]);
+
+  // Separa selecionadas das demais (selecionadas ficam sempre visíveis no topo)
+  const selectedSet         = new Set(selectedCareers.map(sc => sc.id));
+  const selectedInFiltered  = filtered.filter(c =>  selectedSet.has(c.id));
+  const unselectedInFiltered = filtered.filter(c => !selectedSet.has(c.id));
+  const visibleUnselected   = unselectedInFiltered.slice(0, visibleCount);
+  const remaining           = unselectedInFiltered.length - visibleCount;
+  const hasFilters          = !!(search || filterField);
+
+  const chipBtn = (label, active, onClickFn) => (
+    <button key={label} onClick={onClickFn} style={{
+      padding: "5px 14px", borderRadius: 99, fontSize: "0.8rem",
+      border: `1.5px solid ${active ? "#0f172a" : "#e2e8f0"}`,
+      cursor: "pointer", fontFamily: font, fontWeight: active ? 600 : 400,
+      background: active ? "#0f172a" : "#fff",
+      color: active ? "#fff" : "#64748b",
+      transition: "all 0.15s", whiteSpace: "nowrap",
+    }}>{label}</button>
+  );
+
+  const renderCard = (c) => {
+    const isChosen = selectedSet.has(c.id);
+    return (
+      <div key={c.id} style={{
+        ...cardStyle, padding: "1.25rem",
+        border: isChosen ? "2px solid #6366f1" : "1px solid #e2e8f0",
+        background: isChosen ? "#fafaff" : "#fff",
+        transition: "all 0.2s",
+      }}
+        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(0,0,0,0.09)"; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.05)"; }}
+      >
+        {/* Badge "Selecionada" no topo do card */}
+        {isChosen && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              background: "#6366f1", color: "#fff",
+              fontSize: "0.68rem", fontWeight: 700,
+              borderRadius: 99, padding: "2px 8px",
+            }}>
+              <Icon name="check" size={10} /> Selecionada
+            </span>
+          </div>
+        )}
+        <div style={{ width: 40, height: 40, borderRadius: 11, background: `${c.icon_color || "#6366f1"}18`, color: c.icon_color || "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.6rem" }}>
+          <Icon name={CAREER_ICONS[c.title] || c.icon || "briefcase"} size={20} />
+        </div>
+        <p style={{ fontSize: "0.95rem", fontWeight: "600", color: "#0f172a", margin: "0 0 4px", lineHeight: 1.3 }}>{c.title}</p>
+        {c.campo_conhecimento && (
+          <span style={{ display: "inline-block", padding: "2px 8px", background: `${c.icon_color || "#6366f1"}18`, color: c.icon_color || "#6366f1", borderRadius: 99, fontSize: "0.7rem", fontWeight: 600, marginBottom: 6 }}>
+            {c.campo_conhecimento}
+          </span>
+        )}
+        <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0 0 0.875rem", lineHeight: 1.5 }}>
+          {c.description ? (c.description.length > 100 ? c.description.slice(0, 97) + "…" : c.description) : ""}
+        </p>
+        {c.match_score > 0 && (
+          <div style={{ marginBottom: "0.6rem" }}>
+            <div style={{ height: 3, background: "#e2e8f0", borderRadius: 99, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${Math.round(c.match_score * 100)}%`, background: c.match_score > 0.6 ? "#22c55e" : c.match_score > 0.3 ? "#f59e0b" : "#94a3b8", borderRadius: 99 }} />
+            </div>
+            <p style={{ fontSize: "0.7rem", color: "#94a3b8", margin: "3px 0 0" }}>{Math.round(c.match_score * 100)}% compatibilidade</p>
+          </div>
+        )}
+        <button onClick={() => onCareerDetail(c)} style={{
+          display: "block", width: "100%", padding: "0.55rem",
+          background: "none",
+          border: `1.5px solid ${isChosen ? "#c7d2fe" : "#e2e8f0"}`,
+          borderRadius: 9,
+          color: isChosen ? "#4338ca" : "#475569",
+          fontSize: "0.82rem", cursor: "pointer", fontWeight: 500,
+          fontFamily: font, transition: "all 0.15s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.background = isChosen ? "#eef2ff" : "#f8fafc"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
+        >Saber mais</button>
+      </div>
+    );
+  };
+
   return (
     <Page>
       <div style={{ maxWidth: 960, margin: "0 auto", width: "100%" }}>
         <ModuleNav onBack={onBack} onHome={onHome} />
         <h1 style={{ fontSize: "1.8rem", fontWeight: "700", color: "#0f172a", margin: "0 0 0.4rem", letterSpacing: "-0.02em" }}>Horizonte Ampliado</h1>
-        <p style={{ color: "#64748b", margin: "0 0 2rem" }}>Explore diferentes possibilidades de carreira que combinam com seu perfil</p>
+        <p style={{ color: "#64748b", margin: "0 0 1.25rem" }}>Explore diferentes possibilidades de carreira que combinam com seu perfil</p>
 
-        {loading ? <p style={{ color: "#94a3b8" }}>Carregando carreiras...</p> : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-            {careers.map(c => {
-              const isChosen = selectedCareers.some(sc => sc.id === c.id);
-              return (
-                <div key={c.id} style={{
-                  ...cardStyle, padding: "1.5rem",
-                  border: isChosen ? "2px solid #6366f1" : "1px solid #e2e8f0",
-                  transition: "all 0.2s",
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.1)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.05)"; }}
-                >
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: `${c.icon_color || "#6366f1"}18`, color: c.icon_color || "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.75rem" }}>
-                    <Icon name={CAREER_ICONS[c.title] || "briefcase"} size={22} />
-                  </div>
-                  <p style={{ fontSize: "1rem", fontWeight: "600", color: "#0f172a", margin: "0 0 4px" }}>{c.title}</p>
-                  <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 1rem", lineHeight: 1.5 }}>{c.description}</p>
-                  {c.match_score > 0 && (
-                    <div style={{ marginBottom: "0.75rem" }}>
-                      <div style={{ height: 3, background: "#e2e8f0", borderRadius: 99, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${Math.round(c.match_score * 100)}%`, background: c.match_score > 0.6 ? "#22c55e" : c.match_score > 0.3 ? "#f59e0b" : "#94a3b8", borderRadius: 99 }} />
-                      </div>
-                      <p style={{ fontSize: "0.72rem", color: "#94a3b8", margin: "4px 0 0" }}>{Math.round(c.match_score * 100)}% compatibilidade</p>
-                    </div>
-                  )}
-                  <button onClick={() => onCareerDetail(c)} style={{
-                    display: "block", width: "100%", padding: "0.6rem",
-                    background: "none", border: "1.5px solid #e2e8f0", borderRadius: 10,
-                    color: "#475569", fontSize: "0.85rem", cursor: "pointer", fontWeight: 500,
-                    fontFamily: font, transition: "all 0.15s",
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "#f8fafc"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
-                  >Saber mais</button>
-                </div>
-              );
-            })}
+        {/* ── Recomendação do orientador ── */}
+        {adminRecommendation && (
+          <div style={{
+            marginBottom: "1.25rem",
+            background: "linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%)",
+            border: "1.5px solid #c4b5fd",
+            borderRadius: 16,
+            padding: "1.1rem 1.375rem",
+            display: "flex", gap: "1rem", alignItems: "flex-start",
+          }}>
+            {/* Ícone do orientador */}
+            <div style={{
+              width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+              background: `${adminRecommendation.icon_color || "#8b5cf6"}22`,
+              color: adminRecommendation.icon_color || "#8b5cf6",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Icon name="sparkles" size={22} />
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: "0 0 3px", fontSize: "0.7rem", fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+                Recomendação do orientador
+              </p>
+              <p style={{ margin: adminRecommendation.note ? "0 0 5px" : "0", fontSize: "1rem", fontWeight: 700, color: "#4c1d95" }}>
+                {adminRecommendation.title}
+              </p>
+              {adminRecommendation.note && (
+                <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "#6d28d9", lineHeight: 1.55, fontStyle: "italic" }}>
+                  "{adminRecommendation.note}"
+                </p>
+              )}
+            </div>
+
+            {/* Botão para abrir detalhes */}
+            <button
+              onClick={() => onCareerDetail(adminRecommendation)}
+              style={{
+                flexShrink: 0, padding: "6px 14px",
+                border: "1.5px solid #c4b5fd", borderRadius: 99,
+                background: "#fff", color: "#6d28d9",
+                fontSize: "0.78rem", fontWeight: 600,
+                cursor: "pointer", fontFamily: font,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Saber mais
+            </button>
           </div>
         )}
 
+        {/* ── Barra de ferramentas: busca + botão filtros ── */}
+        {!loading && (
+          <div style={{ marginBottom: "1rem" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {/* Campo de busca */}
+              <div style={{ position: "relative", flex: 1 }}>
+                <div style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", pointerEvents: "none" }}>
+                  <Icon name="search" size={15} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Buscar profissão ou palavra-chave…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  style={{
+                    width: "100%", padding: "0.7rem 2.4rem 0.7rem 2.4rem",
+                    border: "1.5px solid #e2e8f0", borderRadius: 12,
+                    fontSize: "0.9rem", outline: "none", boxSizing: "border-box",
+                    fontFamily: font, color: "#0f172a", background: "#fff",
+                    transition: "border-color 0.15s",
+                  }}
+                  onFocus={e => (e.target.style.borderColor = "#6366f1")}
+                  onBlur={e => (e.target.style.borderColor = "#e2e8f0")}
+                />
+                {search && (
+                  <button onClick={() => setSearch("")} style={{
+                    position: "absolute", right: 11, top: "50%", transform: "translateY(-50%)",
+                    background: "none", border: "none", cursor: "pointer", color: "#94a3b8", padding: 3,
+                  }}>
+                    <Icon name="x" size={13} />
+                  </button>
+                )}
+              </div>
+
+              {/* Botão Filtrar — mostra badge quando filtro ativo */}
+              <button
+                onClick={() => setShowFilters(v => !v)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  padding: "0.7rem 1rem", borderRadius: 12, cursor: "pointer",
+                  fontFamily: font, fontSize: "0.88rem", fontWeight: 500,
+                  border: `1.5px solid ${showFilters || filterField ? "#6366f1" : "#e2e8f0"}`,
+                  background: showFilters || filterField ? "#eef2ff" : "#fff",
+                  color: showFilters || filterField ? "#4338ca" : "#475569",
+                  transition: "all 0.15s", whiteSpace: "nowrap", position: "relative",
+                }}
+              >
+                <Icon name="filter" size={15} />
+                Filtrar
+                {filterField && (
+                  <span style={{
+                    position: "absolute", top: -6, right: -6,
+                    width: 16, height: 16, borderRadius: "50%",
+                    background: "#6366f1", color: "#fff",
+                    fontSize: "0.65rem", fontWeight: 700,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 0 0 2px #fff",
+                  }}>1</span>
+                )}
+              </button>
+            </div>
+
+            {/* Painel de filtros — só aparece quando showFilters = true */}
+            {showFilters && (
+              <div style={{
+                marginTop: "0.6rem", padding: "0.875rem 1rem",
+                background: "#f8fafc", borderRadius: 12,
+                border: "1.5px solid #e2e8f0",
+              }}>
+                <p style={{ margin: "0 0 0.5rem", fontSize: "0.78rem", color: "#64748b", fontWeight: 600 }}>Área de conhecimento</p>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {chipBtn("Todas as áreas", filterField === "", () => setFilterField(""))}
+                  {campos.map(c => chipBtn(c, filterField === c, () => setFilterField(f => f === c ? "" : c)))}
+                </div>
+                {filterField && (
+                  <button onClick={() => setFilterField("")} style={{
+                    marginTop: "0.5rem", background: "none", border: "none",
+                    cursor: "pointer", fontSize: "0.78rem", color: "#6366f1",
+                    fontFamily: font, padding: 0, fontWeight: 500,
+                  }}>
+                    Limpar filtro ×
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Contador de resultados — só aparece com filtro ativo */}
+        {!loading && hasFilters && (
+          <p style={{ fontSize: "0.8rem", color: "#94a3b8", margin: "0 0 0.75rem" }}>
+            {filtered.length === 0
+              ? "Nenhuma profissão encontrada"
+              : `${filtered.length} profissão${filtered.length !== 1 ? "ões" : ""} encontrada${filtered.length !== 1 ? "s" : ""}`}
+          </p>
+        )}
+
+        {/* ── Grade de cards ── */}
+        {loading ? (
+          <p style={{ color: "#94a3b8" }}>Carregando carreiras…</p>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+            <p style={{ fontWeight: 600, color: "#475569", margin: "0 0 0.25rem" }}>Nenhuma profissão encontrada</p>
+            <p style={{ fontSize: "0.85rem", margin: 0 }}>Tente outros termos ou limpe os filtros</p>
+            <button onClick={() => { setSearch(""); setFilterField(""); }} style={{
+              marginTop: "0.875rem", padding: "0.45rem 1.1rem", border: "1.5px solid #e2e8f0",
+              borderRadius: 99, background: "#fff", cursor: "pointer", fontFamily: font,
+              fontSize: "0.83rem", color: "#475569",
+            }}>Limpar filtros</button>
+          </div>
+        ) : (
+          <>
+            {/* ── Seção: selecionadas (sempre visíveis no topo) ── */}
+            {selectedInFiltered.length > 0 && (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 0.6rem" }}>
+                  <div style={{
+                    width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
+                    background: "#6366f1", display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Icon name="check" size={11} />
+                  </div>
+                  <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "#6366f1" }}>
+                    Suas seleções ({selectedInFiltered.length})
+                  </span>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "0.875rem", marginBottom: "1rem" }}>
+                  {selectedInFiltered.map(renderCard)}
+                </div>
+                {unselectedInFiltered.length > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "0.1rem 0 0.875rem" }}>
+                    <div style={{ flex: 1, height: 1, background: "#e2e8f0" }} />
+                    <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 500, whiteSpace: "nowrap" }}>Outras profissões</span>
+                    <div style={{ flex: 1, height: 1, background: "#e2e8f0" }} />
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ── Seção: não selecionadas (com paginação) ── */}
+            {visibleUnselected.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "0.875rem", marginBottom: "1rem" }}>
+                {visibleUnselected.map(renderCard)}
+              </div>
+            )}
+
+            {/* Botão Ver mais */}
+            {remaining > 0 && (
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+                <button
+                  onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "0.7rem 1.75rem", borderRadius: 12,
+                    border: "1.5px solid #e2e8f0", background: "#fff",
+                    cursor: "pointer", fontFamily: font, fontSize: "0.88rem",
+                    fontWeight: 500, color: "#475569", transition: "all 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#6366f1"; e.currentTarget.style.color = "#4338ca"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.color = "#475569"; }}
+                >
+                  <Icon name="chevron-down" size={16} />
+                  Ver mais {remaining} profissão{remaining !== 1 ? "ões" : ""}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── Botão continuar ── */}
         <div style={{ display: "flex", justifyContent: "center", paddingBottom: "2rem" }}>
-          <Btn onClick={onContinue} disabled={selectedCareers.length === 0} style={{ padding: "1rem 2.5rem" }}>
+          <Btn onClick={() => selectedCareers.length > 0 && setConfirming(true)} disabled={selectedCareers.length === 0} style={{ padding: "1rem 2.5rem" }}>
             Continuar para Rota Definida <Icon name="arrow-right" size={18} />
           </Btn>
         </div>
@@ -956,82 +1356,184 @@ function HorizonteScreen({ onBack, onCareerDetail, onContinue, selectedCareers, 
           </p>
         )}
       </div>
+
+      {/* Modal de confirmação */}
+      {confirming && (
+        <ConfirmModal
+          title="Avançar para Rota Definida?"
+          body={`Você selecionou ${selectedCareers.length} carreira${selectedCareers.length !== 1 ? "s" : ""} no Horizonte Ampliado. Ao confirmar, seu módulo será concluído e você avançará para a próxima etapa.`}
+          warning="Esta ação não pode ser desfeita. Após confirmar, não será possível voltar e alterar as carreiras escolhidas neste módulo."
+          confirmLabel="Confirmar e avançar"
+          onConfirm={() => { setConfirming(false); onContinue(); }}
+          onCancel={() => setConfirming(false)}
+        />
+      )}
     </Page>
   );
 }
 
 // ─── SCREEN: DETALHE DA CARREIRA ─────────────────────────────────────────────
+
+/** Divide um texto em lista de itens (por vírgula, ponto-e-vírgula, newline ou numeração) */
+function splitList(text) {
+  if (!text) return [];
+  // Remove numeração tipo "1. ", "1) ", "• "
+  const clean = text.replace(/^\s*[\d]+[.)]\s*/gm, "").replace(/^\s*[•\-–]\s*/gm, "");
+  return clean
+    .split(/\n|;/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+/** Seção colapsável com seta */
+function CollapsibleSection({ icon, iconColor, title, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div style={{ ...cardStyle, marginBottom: "0.6rem", overflow: "hidden" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          width: "100%", padding: "1rem 1.25rem",
+          background: "none", border: "none", cursor: "pointer", fontFamily: font,
+          textAlign: "left",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ color: iconColor, flexShrink: 0 }}><Icon name={icon} size={18} /></div>
+          <span style={{ fontSize: "0.95rem", fontWeight: 600, color: "#0f172a" }}>{title}</span>
+        </div>
+        <div style={{ color: "#94a3b8", flexShrink: 0, transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
+          <Icon name="chevron-down" size={18} />
+        </div>
+      </button>
+      {open && (
+        <div style={{ padding: "0 1.25rem 1.1rem" }}>
+          <div style={{ height: 1, background: "#f1f5f9", marginBottom: "0.875rem" }} />
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CareerDetailScreen({ career, onBack, onChoose, isChosen, onHome }) {
-  // Dados mock — futuramente virão do Excel/backend
-  const details = {
-    whatDoes: [
-      "Desenvolve sites, aplicativos e sistemas",
-      "Escreve códigos e testa funcionalidades",
-      "Corrige erros e melhora sistemas existentes",
-      "Trabalha em equipe com outros desenvolvedores",
-      "Mantém documentação técnica atualizada",
-    ],
-    skills: ["Lógica de programação", "Raciocínio analítico", "Atenção aos detalhes", "Resolução de problemas", "Trabalho em equipe"],
-    areas: ["Desenvolvimento web", "Aplicativos mobile", "Sistemas empresariais", "Games", "Inteligência Artificial", "Cloud Computing"],
-  };
+  const color = career.icon_color || "#6366f1";
+
+  const areas    = splitList(career.areas_atuacao);
+  const habilids = splitList(career.habilidades_essenciais);
+  const formacao = splitList(career.requisitos_formacao);
+  const passos   = splitList(career.proximos_passos);
+  const desafios = splitList(career.desafios_desvantagens);
 
   return (
     <Page>
       <div style={{ maxWidth: 720, margin: "0 auto", width: "100%" }}>
         <ModuleNav onBack={onBack} onHome={onHome} />
 
-        {/* Header */}
-        <div style={{ ...cardStyle, padding: "1.5rem", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ width: 56, height: 56, borderRadius: 14, background: `${career.icon_color || "#6366f1"}18`, color: career.icon_color || "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Icon name={CAREER_ICONS[career.title] || "briefcase"} size={28} />
+        {/* ── Header (sempre visível) ── */}
+        <div style={{ ...cardStyle, padding: "1.5rem", marginBottom: "0.75rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.75rem" }}>
+            <div style={{ width: 56, height: 56, borderRadius: 14, background: `${color}18`, color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Icon name={CAREER_ICONS[career.title] || career.icon || "briefcase"} size={28} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h1 style={{ fontSize: "1.4rem", fontWeight: "700", color: "#0f172a", margin: "0 0 5px" }}>{career.title}</h1>
+              {career.campo_conhecimento && (
+                <span style={{ display: "inline-block", padding: "2px 10px", background: `${color}18`, color, borderRadius: 99, fontSize: "0.78rem", fontWeight: 600 }}>
+                  {career.campo_conhecimento}
+                </span>
+              )}
+            </div>
           </div>
-          <div>
-            <h1 style={{ fontSize: "1.4rem", fontWeight: "700", color: "#0f172a", margin: "0 0 4px" }}>{career.title}</h1>
-            <p style={{ color: "#64748b", margin: 0, fontSize: "0.9rem" }}>{career.description}</p>
-          </div>
+          {career.description && (
+            <p style={{ color: "#475569", margin: 0, fontSize: "0.92rem", lineHeight: 1.6 }}>{career.description}</p>
+          )}
         </div>
 
-        {/* O que faz */}
-        <div style={{ ...cardStyle, padding: "1.5rem", marginBottom: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1rem" }}>
-            <div style={{ color: "#6366f1" }}><Icon name="clock" size={20} /></div>
-            <h2 style={{ fontSize: "1rem", fontWeight: "600", color: "#0f172a", margin: 0 }}>O que faz</h2>
-          </div>
-          <ul style={{ margin: 0, paddingLeft: "1.2rem", display: "flex", flexDirection: "column", gap: 6 }}>
-            {details.whatDoes.map((item, i) => (
-              <li key={i} style={{ color: "#374151", fontSize: "0.9rem", lineHeight: 1.5 }}>{item}</li>
-            ))}
-          </ul>
-        </div>
+        {/* ── Seções colapsáveis ── */}
+        {career.descricao_campo && (
+          <CollapsibleSection icon="book-open" iconColor="#6366f1" title="Sobre a área de conhecimento" defaultOpen={true}>
+            <p style={{ margin: 0, color: "#374151", fontSize: "0.9rem", lineHeight: 1.65 }}>{career.descricao_campo}</p>
+          </CollapsibleSection>
+        )}
 
-        {/* Habilidades */}
-        <div style={{ ...cardStyle, padding: "1.5rem", marginBottom: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1rem" }}>
-            <div style={{ color: "#8b5cf6" }}><Icon name="sparkles" size={20} /></div>
-            <h2 style={{ fontSize: "1rem", fontWeight: "600", color: "#0f172a", margin: 0 }}>Habilidades necessárias</h2>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {details.skills.map((s, i) => (
-              <span key={i} style={{ padding: "5px 12px", background: "#f1f5f9", borderRadius: 99, fontSize: "0.82rem", color: "#475569", fontWeight: 500 }}>{s}</span>
-            ))}
-          </div>
-        </div>
+        {areas.length > 0 && (
+          <CollapsibleSection icon="briefcase" iconColor="#10b981" title="Áreas de atuação" defaultOpen={true}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {areas.map((a, i) => (
+                <span key={i} style={{ padding: "5px 12px", border: "1.5px solid #e2e8f0", borderRadius: 10, fontSize: "0.82rem", color: "#374151" }}>{a}</span>
+              ))}
+            </div>
+          </CollapsibleSection>
+        )}
 
-        {/* Áreas */}
-        <div style={{ ...cardStyle, padding: "1.5rem", marginBottom: "1.5rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1rem" }}>
-            <div style={{ color: "#10b981" }}><Icon name="briefcase" size={20} /></div>
-            <h2 style={{ fontSize: "1rem", fontWeight: "600", color: "#0f172a", margin: 0 }}>Áreas de atuação</h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
-            {details.areas.map((a, i) => (
-              <div key={i} style={{ padding: "0.6rem 1rem", border: "1.5px solid #e2e8f0", borderRadius: 10, fontSize: "0.85rem", color: "#374151", textAlign: "center" }}>{a}</div>
-            ))}
-          </div>
-        </div>
+        {habilids.length > 0 && (
+          <CollapsibleSection icon="sparkles" iconColor="#8b5cf6" title="Habilidades essenciais" defaultOpen={true}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {habilids.map((s, i) => (
+                <span key={i} style={{ padding: "5px 12px", background: "#f1f5f9", borderRadius: 99, fontSize: "0.82rem", color: "#475569", fontWeight: 500 }}>{s}</span>
+              ))}
+            </div>
+          </CollapsibleSection>
+        )}
 
-        {/* Botões */}
-        <div style={{ display: "flex", gap: "0.75rem", paddingBottom: "2rem" }}>
+        {career.tendencias_mercado && (
+          <CollapsibleSection icon="trending-up" iconColor="#0ea5e9" title="Tendências de mercado">
+            <p style={{ margin: 0, color: "#374151", fontSize: "0.9rem", lineHeight: 1.65 }}>{career.tendencias_mercado}</p>
+          </CollapsibleSection>
+        )}
+
+        {career.potencial_renda && (
+          <CollapsibleSection icon="dollar-sign" iconColor="#22c55e" title="Potencial de renda">
+            <p style={{ margin: 0, color: "#374151", fontSize: "0.9rem", lineHeight: 1.65 }}>{career.potencial_renda}</p>
+          </CollapsibleSection>
+        )}
+
+        {formacao.length > 0 && (
+          <CollapsibleSection icon="graduation-cap" iconColor="#f59e0b" title="Formação necessária">
+            <ul style={{ margin: 0, paddingLeft: "1.2rem", display: "flex", flexDirection: "column", gap: 5 }}>
+              {formacao.map((item, i) => (
+                <li key={i} style={{ color: "#374151", fontSize: "0.9rem", lineHeight: 1.5 }}>{item}</li>
+              ))}
+            </ul>
+          </CollapsibleSection>
+        )}
+
+        {career.ambiente_trabalho && (
+          <CollapsibleSection icon="home" iconColor="#64748b" title="Ambiente de trabalho">
+            <p style={{ margin: 0, color: "#374151", fontSize: "0.9rem", lineHeight: 1.65 }}>{career.ambiente_trabalho}</p>
+          </CollapsibleSection>
+        )}
+
+        {career.possibilidades_crescimento && (
+          <CollapsibleSection icon="arrow-up" iconColor="#ec4899" title="Possibilidades de crescimento">
+            <p style={{ margin: 0, color: "#374151", fontSize: "0.9rem", lineHeight: 1.65 }}>{career.possibilidades_crescimento}</p>
+          </CollapsibleSection>
+        )}
+
+        {desafios.length > 0 && (
+          <CollapsibleSection icon="alert-triangle" iconColor="#f97316" title="Desafios e desvantagens">
+            <ul style={{ margin: 0, paddingLeft: "1.2rem", display: "flex", flexDirection: "column", gap: 5 }}>
+              {desafios.map((item, i) => (
+                <li key={i} style={{ color: "#374151", fontSize: "0.9rem", lineHeight: 1.5 }}>{item}</li>
+              ))}
+            </ul>
+          </CollapsibleSection>
+        )}
+
+        {passos.length > 0 && (
+          <CollapsibleSection icon="map-pin" iconColor="#6366f1" title="Próximos passos">
+            <ol style={{ margin: 0, paddingLeft: "1.2rem", display: "flex", flexDirection: "column", gap: 6 }}>
+              {passos.map((item, i) => (
+                <li key={i} style={{ color: "#374151", fontSize: "0.9rem", lineHeight: 1.5 }}>{item}</li>
+              ))}
+            </ol>
+          </CollapsibleSection>
+        )}
+
+        {/* ── Botões ── */}
+        <div style={{ display: "flex", gap: "0.75rem", paddingBottom: "2rem", marginTop: "0.75rem" }}>
           <Btn onClick={onBack} variant="outline" style={{ flex: 1 }}>
             <Icon name="arrow-left" size={18} /> Voltar
           </Btn>
@@ -1073,6 +1575,7 @@ function RotaDefinidaScreen({ onBack, selectedCareers, onCreatePlan, onHome }) {
     selectedCareers[0]
   );
   const [featured, setFeatured] = useState(best);
+  const [confirming, setConfirming] = useState(false);
   const related = selectedCareers.filter(c => c.id !== featured?.id);
 
   if (selectedCareers.length === 0) {
@@ -1142,7 +1645,7 @@ function RotaDefinidaScreen({ onBack, selectedCareers, onCreatePlan, onHome }) {
 
           {/* Botão */}
           <button
-            onClick={() => onCreatePlan(featured)}
+            onClick={() => setConfirming(true)}
             style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               width: "100%", marginTop: "1.75rem", padding: "1rem",
@@ -1187,6 +1690,18 @@ function RotaDefinidaScreen({ onBack, selectedCareers, onCreatePlan, onHome }) {
           </div>
         )}
       </div>
+
+      {/* Modal de confirmação */}
+      {confirming && (
+        <ConfirmModal
+          title={`Escolher "${featured.title}"?`}
+          body={`Você está prestes a definir "${featured.title}" como sua carreira escolhida e avançar para o Plano de Voo.`}
+          warning="Esta ação não pode ser desfeita. Após confirmar, sua escolha de carreira ficará registrada e você não poderá retornar para alterar a Rota Definida."
+          confirmLabel="Confirmar escolha e avançar"
+          onConfirm={() => { setConfirming(false); onCreatePlan(featured); }}
+          onCancel={() => setConfirming(false)}
+        />
+      )}
     </Page>
   );
 }
@@ -1397,6 +1912,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [selectedCareers, setSelectedCareers] = useState([]);
+  const [adminRecommendation, setAdminRecommendation] = useState(null);
   const [careerDetail, setCareerDetail] = useState(null);
   const [planCareer, setPlanCareer] = useState(null);
   const [registerSuccess, setRegisterSuccess] = useState("");
@@ -1422,9 +1938,11 @@ export default function App() {
       Promise.all([
         api("GET", `/sessions/${encodeURIComponent(sid)}/progress`),
         api("GET", `/sessions/${encodeURIComponent(sid)}/career-selections`).catch(() => []),
-      ]).then(([prog, careers]) => {
+        api("GET", `/sessions/${encodeURIComponent(sid)}/recommendation`).catch(() => null),
+      ]).then(([prog, careers, rec]) => {
           setProgress(prog);
           if (careers.length > 0) setSelectedCareers(careers);
+          if (rec) setAdminRecommendation(rec);
           setScreen(prog.some(m => m.completed) ? "jornada" : "bemvindo");
         })
         .catch(() => { localStorage.removeItem("journeyUser"); })
@@ -1440,9 +1958,11 @@ export default function App() {
     Promise.all([
       api("GET", `/sessions/${encodeURIComponent(id)}/progress`),
       api("GET", `/sessions/${encodeURIComponent(id)}/career-selections`).catch(() => []),
-    ]).then(([prog, careers]) => {
+      api("GET", `/sessions/${encodeURIComponent(id)}/recommendation`).catch(() => null),
+    ]).then(([prog, careers, rec]) => {
       setProgress(prog);
       if (careers.length > 0) setSelectedCareers(careers);
+      if (rec) setAdminRecommendation(rec); else setAdminRecommendation(null);
     }).catch(() => setProgress([
       { module_id: 1, module_title: "Mapa Interior", slug: "mapa-interior", completed: false },
       { module_id: 2, module_title: "Horizonte Ampliado", slug: "horizonte-ampliado", completed: false },
@@ -1457,12 +1977,14 @@ export default function App() {
     localStorage.setItem("journeyUser", JSON.stringify({ email, name, sessionId: sid }));
     setLoading(true);
     try {
-      const [prog, careers] = await Promise.all([
+      const [prog, careers, rec] = await Promise.all([
         api("GET", `/sessions/${encodeURIComponent(sid)}/progress`),
         api("GET", `/sessions/${encodeURIComponent(sid)}/career-selections`).catch(() => []),
+        api("GET", `/sessions/${encodeURIComponent(sid)}/recommendation`).catch(() => null),
       ]);
       setProgress(prog);
       if (careers.length > 0) setSelectedCareers(careers);
+      if (rec) setAdminRecommendation(rec); else setAdminRecommendation(null);
       setScreen(prog.some(m => m.completed) ? "jornada" : "bemvindo");
     } catch {
       setScreen("bemvindo");
@@ -1492,6 +2014,7 @@ export default function App() {
     setUserName("");
     setProgress([]);
     setSelectedCareers([]);
+    setAdminRecommendation(null);
     setCareerDetail(null);
     setPlanCareer(null);
     setRegisterSuccess("");
@@ -1573,6 +2096,7 @@ export default function App() {
       progress={progress}
       onDashboard={() => setScreen("dashboard")}
       onProgress={() => setScreen("progresso")}
+      adminRecommendation={adminRecommendation}
     />
   );
 
@@ -1643,6 +2167,7 @@ export default function App() {
         selectedCareers={selectedCareers}
         sessionId={sessionId}
         onHome={() => setScreen("jornada")}
+        adminRecommendation={adminRecommendation}
       />
     );
   }

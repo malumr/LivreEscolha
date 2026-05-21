@@ -141,6 +141,18 @@ class CareerSelection(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
+class AdminRecommendation(Base):
+    """Carreira recomendada pelo admin para um usuário específico."""
+    __tablename__ = "admin_recommendations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(100), ForeignKey("user_sessions.id"), nullable=False, unique=True)
+    career_id = Column(Integer, ForeignKey("careers.id"), nullable=False)
+    note = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
 class Career(Base):
     """Carreiras disponíveis no Horizonte Ampliado."""
     __tablename__ = "careers"
@@ -153,3 +165,16 @@ class Career(Base):
     # Tags que batem com as career_tags das opções de resposta
     tags = Column(String(500), default="")                   # Ex: "tech,analytical,independent"
     match_score = Column(Float, default=0.0)                 # preenchido dinamicamente
+
+    # ── Campos vindos da planilha ATIVIDADE 4 ──────────────────────────────────
+    campo_conhecimento       = Column(String(150), nullable=True)   # col C
+    descricao_campo          = Column(Text,         nullable=True)   # col D
+    areas_atuacao            = Column(Text,         nullable=True)   # col E
+    tendencias_mercado       = Column(Text,         nullable=True)   # col G
+    potencial_renda          = Column(Text,         nullable=True)   # col H
+    requisitos_formacao      = Column(Text,         nullable=True)   # col I
+    habilidades_essenciais   = Column(Text,         nullable=True)   # col J
+    ambiente_trabalho        = Column(Text,         nullable=True)   # col K
+    possibilidades_crescimento = Column(Text,       nullable=True)   # col L
+    desafios_desvantagens    = Column(Text,         nullable=True)   # col M
+    proximos_passos          = Column(Text,         nullable=True)   # col N

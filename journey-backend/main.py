@@ -327,6 +327,12 @@ def admin_list_users(db: Session = Depends(get_db)):
             c = crud.get_career(db, def_choice.career_id)
             if c:
                 definitive_career = {"id": c.id, "title": c.title, "icon_color": c.icon_color}
+        rec = crud.get_admin_recommendation(db, u.email)
+        admin_recommendation = None
+        if rec:
+            c = crud.get_career(db, rec.career_id)
+            if c:
+                admin_recommendation = {"id": c.id, "title": c.title, "icon_color": c.icon_color, "note": rec.note}
         result.append({
             "id": u.id,
             "name": u.name,
@@ -336,6 +342,7 @@ def admin_list_users(db: Session = Depends(get_db)):
             "modules_completed": modules_completed,
             "selected_careers": selected_careers,
             "definitive_career": definitive_career,
+            "admin_recommendation": admin_recommendation,
         })
     return {"users": result, "total": len(result)}
 
@@ -378,9 +385,43 @@ def admin_delete_session(session_id: str, db: Session = Depends(get_db)):
     db.query(models.ModuleProgress).filter(models.ModuleProgress.session_id == session_id).delete()
     db.query(models.CareerSelection).filter(models.CareerSelection.session_id == session_id).delete()
     db.query(models.DefinitiveCareer).filter(models.DefinitiveCareer.session_id == session_id).delete()
+    db.query(models.AdminRecommendation).filter(models.AdminRecommendation.session_id == session_id).delete()
     db.query(models.UserSession).filter(models.UserSession.id == session_id).delete()
     db.commit()
     return {"status": "ok", "message": "Sessão apagada com sucesso"}
+
+
+@app.post("/admin/sessions/{session_id}/recommend-career", tags=["admin"])
+def admin_recommend_career(session_id: str, payload: schemas.AdminRecommendationCreate, db: Session = Depends(get_db)):
+    """Admin sugere/recomenda uma carreira para o usuário."""
+    crud.get_or_create_session(db, session_id)
+    crud.save_admin_recommendation(db, session_id, payload.career_id, payload.note)
+    return {"status": "ok"}
+
+
+@app.delete("/admin/sessions/{session_id}/recommend-career", tags=["admin"])
+def admin_delete_recommendation(session_id: str, db: Session = Depends(get_db)):
+    """Remove a recomendação de carreira feita pelo admin."""
+    crud.delete_admin_recommendation(db, session_id)
+    return {"status": "ok"}
+
+
+@app.get("/sessions/{session_id}/recommendation")
+def get_recommendation(session_id: str, db: Session = Depends(get_db)):
+    """Retorna a recomendação de carreira feita pelo admin para este usuário."""
+    rec = crud.get_admin_recommendation(db, session_id)
+    if not rec:
+        return None
+    career = crud.get_career(db, rec.career_id)
+    if not career:
+        return None
+    return {
+        "id": career.id,
+        "title": career.title,
+        "description": career.description,
+        "icon_color": career.icon_color,
+        "note": rec.note,
+    }
 
 
 @app.delete("/admin/answers/{answer_id}", tags=["admin"])

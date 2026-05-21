@@ -133,12 +133,17 @@ function SessionsTab({ sessions, onSelectSession, onDeleteSession }) {
 }
 
 // ─── ABA: RESPOSTAS DE UMA SESSÃO ────────────────────────────────────────────
-function SessionAnswersTab({ sessionId, onBack, onDeleteAnswer }) {
+function SessionAnswersTab({ sessionId, onBack, onDeleteAnswer, allCareers }) {
   const [answers, setAnswers] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [selectedCareers, setSelectedCareers] = useState([]);
   const [careersSource, setCareersSource] = useState("chosen");
   const [definitiveCareer, setDefinitiveCareer] = useState(null);
+  const [recommendation, setRecommendation] = useState(null);
+  const [recCareerId, setRecCareerId] = useState("");
+  const [recNote, setRecNote] = useState("");
+  const [savingRec, setSavingRec] = useState(false);
+  const [horizonteConcluido, setHorizonteConcluido] = useState(false);
   const [loading, setLoading] = useState(true);
   const [confirm, setConfirm] = useState(null);
 
@@ -149,10 +154,19 @@ function SessionAnswersTab({ sessionId, onBack, onDeleteAnswer }) {
       api("GET", `/sessions/${sessionId}/career-selections`).catch(() => []),
       api("GET", `/sessions/${sessionId}/careers`).catch(() => []),
       api("GET", `/sessions/${sessionId}/definitive-career`).catch(() => null),
-    ]).then(([ans, qs, chosen, recommended, definitive]) => {
+      api("GET", `/sessions/${sessionId}/recommendation`).catch(() => null),
+      api("GET", `/sessions/${sessionId}/progress`).catch(() => []),
+    ]).then(([ans, qs, chosen, recommended, definitive, rec, prog]) => {
       setAnswers(ans);
       setQuestions(qs);
       setDefinitiveCareer(definitive);
+      const horizonte = prog.find(p => p.slug === "horizonte-ampliado");
+      setHorizonteConcluido(horizonte?.completed === true);
+      if (rec) {
+        setRecommendation(rec);
+        setRecCareerId(String(rec.id));
+        setRecNote(rec.note || "");
+      }
       if (chosen.length > 0) {
         setSelectedCareers(chosen);
         setCareersSource("chosen");
@@ -166,6 +180,31 @@ function SessionAnswersTab({ sessionId, onBack, onDeleteAnswer }) {
     }).catch(console.error)
       .finally(() => setLoading(false));
   }, [sessionId]);
+
+  async function handleSaveRecommendation() {
+    if (!recCareerId) return;
+    setSavingRec(true);
+    try {
+      await api("POST", `/admin/sessions/${sessionId}/recommend-career`, {
+        career_id: parseInt(recCareerId),
+        note: recNote.trim() || null,
+      });
+      const career = allCareers.find(c => c.id === parseInt(recCareerId));
+      setRecommendation(career ? { ...career, note: recNote.trim() || null } : null);
+    } catch { alert("Erro ao salvar recomendação."); }
+    finally { setSavingRec(false); }
+  }
+
+  async function handleRemoveRecommendation() {
+    setSavingRec(true);
+    try {
+      await api("DELETE", `/admin/sessions/${sessionId}/recommend-career`);
+      setRecommendation(null);
+      setRecCareerId("");
+      setRecNote("");
+    } catch { alert("Erro ao remover recomendação."); }
+    finally { setSavingRec(false); }
+  }
 
   function getQuestionText(qid) {
     return questions.find(q => q.id === qid)?.text || `Pergunta #${qid}`;
@@ -204,6 +243,80 @@ function SessionAnswersTab({ sessionId, onBack, onDeleteAnswer }) {
           )}
         </Card>
       )}
+
+      {/* Card de Recomendação do Admin — só exibe enquanto Horizonte Ampliado não foi concluído */}
+      {!horizonteConcluido && <Card style={{ marginBottom: "1rem", borderLeft: "3px solid #8b5cf6", background: "#faf5ff" }}>
+        <p style={{ margin: "0 0 0.75rem", fontSize: "0.75rem", fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          💡 Recomendar carreira ao usuário
+        </p>
+        {recommendation && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "0.75rem", padding: "0.625rem 0.875rem", background: "#ede9fe", borderRadius: 10 }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: recommendation.icon_color || "#8b5cf6", flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "#4c1d95" }}>{recommendation.title}</span>
+              {recommendation.note && (
+                <p style={{ margin: "2px 0 0", fontSize: "0.8rem", color: "#6d28d9", fontStyle: "italic" }}>"{recommendation.note}"</p>
+              )}
+            </div>
+            <span style={{ fontSize: "0.7rem", background: "#8b5cf6", color: "#fff", padding: "2px 8px", borderRadius: 99, fontWeight: 600, whiteSpace: "nowrap" }}>Ativa</span>
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 8, marginBottom: "0.625rem" }}>
+          <select
+            value={recCareerId}
+            onChange={e => setRecCareerId(e.target.value)}
+            style={{
+              flex: 1, height: 38, borderRadius: 8, border: "1.5px solid #ddd6fe",
+              padding: "0 10px", fontFamily: font, fontSize: "0.875rem",
+              background: "#fff", color: "#0f172a", outline: "none",
+            }}
+          >
+            <option value="">Selecionar carreira...</option>
+            {allCareers.map(c => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </select>
+        </div>
+        <textarea
+          value={recNote}
+          onChange={e => setRecNote(e.target.value)}
+          placeholder="Mensagem opcional para o usuário (ex: Esta carreira combina muito com seu perfil!)"
+          rows={2}
+          style={{
+            width: "100%", borderRadius: 8, border: "1.5px solid #ddd6fe",
+            padding: "8px 10px", fontFamily: font, fontSize: "0.85rem",
+            resize: "none", outline: "none", boxSizing: "border-box",
+            marginBottom: "0.625rem", background: "#fff",
+          }}
+        />
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={handleSaveRecommendation}
+            disabled={!recCareerId || savingRec}
+            style={{
+              padding: "0.5rem 1.25rem", borderRadius: 8, border: "none",
+              background: !recCareerId || savingRec ? "#c4b5fd" : "#7c3aed",
+              color: "#fff", cursor: !recCareerId || savingRec ? "not-allowed" : "pointer",
+              fontFamily: font, fontSize: "0.85rem", fontWeight: 600, transition: "background 0.15s",
+            }}
+          >
+            {savingRec ? "Salvando..." : recommendation ? "Atualizar recomendação" : "Enviar recomendação"}
+          </button>
+          {recommendation && (
+            <button
+              onClick={handleRemoveRecommendation}
+              disabled={savingRec}
+              style={{
+                padding: "0.5rem 1rem", borderRadius: 8, border: "none",
+                background: "#fee2e2", color: "#b91c1c", cursor: "pointer",
+                fontFamily: font, fontSize: "0.85rem", fontWeight: 500,
+              }}
+            >
+              Remover
+            </button>
+          )}
+        </div>
+      </Card>}
 
       {selectedCareers.length > 0 && (
         <Card style={{ marginBottom: "1rem", borderLeft: `3px solid ${careersSource === "chosen" ? "#6366f1" : "#f59e0b"}` }}>
@@ -366,6 +479,27 @@ function UsersTab({ users }) {
                   </div>
                 </div>
               )}
+
+              {u.admin_recommendation && (
+                <div style={{ marginTop: "0.75rem", paddingTop: "0.75rem", borderTop: "1px solid #f1f5f9" }}>
+                  <p style={{ margin: "0 0 0.4rem", fontSize: "0.72rem", fontWeight: 600, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    💡 Recomendação do orientador
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: u.admin_recommendation.icon_color || "#8b5cf6", flexShrink: 0 }} />
+                    <span style={{
+                      fontSize: "0.875rem", fontWeight: 700, color: "#4c1d95",
+                      padding: "4px 14px", borderRadius: 99,
+                      background: "#ede9fe", border: "1.5px solid #c4b5fd",
+                    }}>{u.admin_recommendation.title}</span>
+                  </div>
+                  {u.admin_recommendation.note && (
+                    <p style={{ margin: "0.375rem 0 0", fontSize: "0.8rem", color: "#6d28d9", fontStyle: "italic" }}>
+                      "{u.admin_recommendation.note}"
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -517,6 +651,7 @@ export default function Admin() {
               sessionId={selectedSession}
               onBack={() => setSelectedSession(null)}
               onDeleteAnswer={handleDeleteAnswer}
+              allCareers={careers}
             />
           ) : (
             <SessionsTab
