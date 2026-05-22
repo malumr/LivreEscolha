@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const API = "http://localhost:8000";
 
@@ -127,6 +127,118 @@ function SessionsTab({ sessions, onSelectSession, onDeleteSession }) {
           onConfirm={() => { onDeleteSession(confirm); setConfirm(null); }}
           onCancel={() => setConfirm(null)}
         />
+      )}
+    </div>
+  );
+}
+
+// ─── COMBOBOX DE BUSCA DE CARREIRAS ──────────────────────────────────────────
+function CareerSearchSelect({ careers, value, onChange }) {
+  const [query, setQuery]     = useState("");
+  const [open, setOpen]       = useState(false);
+  const [focused, setFocused] = useState(false);
+  const containerRef          = useRef(null);
+
+  const selectedName = value ? (careers.find(c => String(c.id) === String(value))?.title || "") : "";
+
+  const results = query.trim()
+    ? careers.filter(c => c.title.toLowerCase().includes(query.toLowerCase()) ||
+        (c.campo_conhecimento || "").toLowerCase().includes(query.toLowerCase()))
+    : careers;
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+        setQuery("");
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  function handleSelect(career) {
+    onChange(String(career.id));
+    setQuery("");
+    setOpen(false);
+  }
+
+  function handleClear(e) {
+    e.stopPropagation();
+    onChange("");
+    setQuery("");
+    setOpen(false);
+  }
+
+  return (
+    <div ref={containerRef} style={{ position: "relative", flex: 1 }}>
+      <div
+        onClick={() => setOpen(true)}
+        style={{
+          display: "flex", alignItems: "center", gap: 6,
+          height: 38, borderRadius: 8, border: `1.5px solid ${focused ? "#8b5cf6" : "#ddd6fe"}`,
+          padding: "0 10px", background: "#fff", cursor: "text",
+          transition: "border-color 0.15s",
+        }}
+      >
+        <span style={{ color: "#a78bfa", fontSize: "0.85rem", flexShrink: 0 }}>🔍</span>
+        <input
+          type="text"
+          value={open ? query : (value ? selectedName : query)}
+          onChange={e => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => { setFocused(true); setOpen(true); }}
+          onBlur={() => setFocused(false)}
+          placeholder={value ? selectedName : "Buscar profissão…"}
+          style={{
+            flex: 1, border: "none", outline: "none",
+            fontFamily: font, fontSize: "0.875rem",
+            color: value && !open ? "#0f172a" : "#374151",
+            background: "transparent",
+            fontWeight: value && !open ? 600 : 400,
+          }}
+        />
+        {value && (
+          <button onClick={handleClear} style={{
+            background: "none", border: "none", cursor: "pointer",
+            color: "#a78bfa", fontSize: "0.85rem", flexShrink: 0, lineHeight: 1,
+          }}>✕</button>
+        )}
+      </div>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0,
+          background: "#fff", borderRadius: 10, border: "1.5px solid #ddd6fe",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 200,
+          maxHeight: 220, overflowY: "auto",
+        }}>
+          {results.length === 0 ? (
+            <p style={{ margin: 0, padding: "0.75rem 1rem", fontSize: "0.85rem", color: "#94a3b8", textAlign: "center" }}>
+              Nenhuma profissão encontrada
+            </p>
+          ) : (
+            results.map(c => (
+              <button
+                key={c.id}
+                onMouseDown={() => handleSelect(c)}
+                style={{
+                  display: "block", width: "100%", textAlign: "left",
+                  padding: "0.55rem 1rem", border: "none", background: "none",
+                  cursor: "pointer", fontFamily: font,
+                  borderBottom: "1px solid #f5f3ff",
+                  transition: "background 0.1s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "#faf5ff")}
+                onMouseLeave={e => (e.currentTarget.style.background = "none")}
+              >
+                <span style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#0f172a" }}>{c.title}</span>
+                {c.campo_conhecimento && (
+                  <span style={{ fontSize: "0.72rem", color: "#7c3aed" }}>{c.campo_conhecimento}</span>
+                )}
+              </button>
+            ))
+          )}
+        </div>
       )}
     </div>
   );
@@ -262,20 +374,11 @@ function SessionAnswersTab({ sessionId, onBack, onDeleteAnswer, allCareers }) {
           </div>
         )}
         <div style={{ display: "flex", gap: 8, marginBottom: "0.625rem" }}>
-          <select
+          <CareerSearchSelect
+            careers={allCareers}
             value={recCareerId}
-            onChange={e => setRecCareerId(e.target.value)}
-            style={{
-              flex: 1, height: 38, borderRadius: 8, border: "1.5px solid #ddd6fe",
-              padding: "0 10px", fontFamily: font, fontSize: "0.875rem",
-              background: "#fff", color: "#0f172a", outline: "none",
-            }}
-          >
-            <option value="">Selecionar carreira...</option>
-            {allCareers.map(c => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </select>
+            onChange={setRecCareerId}
+          />
         </div>
         <textarea
           value={recNote}
@@ -510,22 +613,117 @@ function UsersTab({ users }) {
 
 // ─── ABA: CARREIRAS ───────────────────────────────────────────────────────────
 function CareersTab({ careers }) {
+  const [search, setSearch]           = useState("");
+  const [filterField, setFilterField] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const campos = [...new Set(careers.map(c => c.campo_conhecimento).filter(Boolean))].sort();
+
+  const q = search.toLowerCase().trim();
+  const filtered = careers.filter(c => {
+    const matchField  = !filterField || c.campo_conhecimento === filterField;
+    const matchSearch = !q ||
+      c.title.toLowerCase().includes(q) ||
+      (c.description || "").toLowerCase().includes(q) ||
+      (c.campo_conhecimento || "").toLowerCase().includes(q) ||
+      (c.tags || "").toLowerCase().includes(q);
+    return matchField && matchSearch;
+  });
+
+  const chipStyle = (active) => ({
+    padding: "5px 13px", borderRadius: 99, fontSize: "0.78rem",
+    border: `1.5px solid ${active ? "#0f172a" : "#e2e8f0"}`,
+    cursor: "pointer", fontFamily: font, fontWeight: active ? 600 : 400,
+    background: active ? "#0f172a" : "#fff",
+    color: active ? "#fff" : "#64748b",
+    transition: "all 0.15s", whiteSpace: "nowrap",
+  });
+
   return (
     <div>
-      <p style={{ margin: "0 0 1rem", fontSize: "0.8rem", color: "#64748b" }}>{careers.length} carreira(s) cadastrada(s)</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 8 }}>
-        {careers.map(c => (
-          <Card key={c.id}>
-            <p style={{ margin: "0 0 4px", fontWeight: 600, fontSize: "0.9rem", color: "#0f172a" }}>{c.title}</p>
-            <p style={{ margin: "0 0 8px", fontSize: "0.8rem", color: "#64748b", lineHeight: 1.4 }}>{c.description}</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {(c.tags || "").split(",").filter(Boolean).map((t, i) => (
-                <span key={i} style={{ fontSize: "0.7rem", padding: "2px 8px", borderRadius: 99, background: "#f1f5f9", color: "#475569" }}>{t.trim()}</span>
+      {/* ── Barra de ferramentas ── */}
+      <div style={{ marginBottom: "1rem" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: "0.85rem", pointerEvents: "none" }}>🔍</span>
+            <input
+              type="text"
+              placeholder="Buscar por nome, descrição ou área…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ width: "100%", height: 38, padding: "0 34px 0 32px", borderRadius: 10, border: "1.5px solid #e2e8f0", fontFamily: font, fontSize: "0.875rem", outline: "none", boxSizing: "border-box", transition: "border-color 0.15s" }}
+              onFocus={e => (e.target.style.borderColor = "#6366f1")}
+              onBlur={e  => (e.target.style.borderColor = "#e2e8f0")}
+            />
+            {search && (
+              <button onClick={() => setSearch("")} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#94a3b8", fontSize: "0.8rem", lineHeight: 1 }}>✕</button>
+            )}
+          </div>
+          <button
+            onClick={() => setShowFilters(v => !v)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6, height: 38, padding: "0 1rem", borderRadius: 10,
+              cursor: "pointer", fontFamily: font, fontSize: "0.875rem", fontWeight: 500,
+              border: `1.5px solid ${showFilters || filterField ? "#6366f1" : "#e2e8f0"}`,
+              background: showFilters || filterField ? "#eef2ff" : "#fff",
+              color: showFilters || filterField ? "#4338ca" : "#475569",
+              position: "relative", whiteSpace: "nowrap", transition: "all 0.15s",
+            }}
+          >
+            ⚙ Filtrar
+            {filterField && (
+              <span style={{ position: "absolute", top: -6, right: -6, width: 16, height: 16, borderRadius: "50%", background: "#6366f1", color: "#fff", fontSize: "0.65rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 2px #f8fafc" }}>1</span>
+            )}
+          </button>
+          <span style={{ fontSize: "0.8rem", color: "#94a3b8", whiteSpace: "nowrap" }}>{filtered.length} de {careers.length}</span>
+        </div>
+
+        {showFilters && (
+          <div style={{ marginTop: "0.5rem", padding: "0.875rem 1rem", background: "#f8fafc", borderRadius: 10, border: "1.5px solid #e2e8f0" }}>
+            <p style={{ margin: "0 0 0.5rem", fontSize: "0.78rem", color: "#64748b", fontWeight: 600 }}>Área de conhecimento</p>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <button style={chipStyle(filterField === "")} onClick={() => setFilterField("")}>Todas as áreas</button>
+              {campos.map(c => (
+                <button key={c} style={chipStyle(filterField === c)} onClick={() => setFilterField(f => f === c ? "" : c)}>{c}</button>
               ))}
             </div>
-          </Card>
-        ))}
+            {filterField && (
+              <button onClick={() => setFilterField("")} style={{ marginTop: "0.5rem", background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", color: "#6366f1", fontFamily: font, padding: 0, fontWeight: 500 }}>Limpar filtro ×</button>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* ── Grid ── */}
+      {filtered.length === 0 ? (
+        <Card>
+          <p style={{ color: "#94a3b8", textAlign: "center", margin: "0 0 0.5rem" }}>Nenhuma carreira encontrada.</p>
+          <div style={{ textAlign: "center" }}>
+            <button onClick={() => { setSearch(""); setFilterField(""); }} style={{ padding: "0.4rem 1rem", border: "1.5px solid #e2e8f0", borderRadius: 99, background: "#fff", cursor: "pointer", fontFamily: font, fontSize: "0.8rem", color: "#475569" }}>Limpar filtros</button>
+          </div>
+        </Card>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 8 }}>
+          {filtered.map(c => (
+            <Card key={c.id}>
+              {c.campo_conhecimento && (
+                <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 9px", borderRadius: 99, marginBottom: 7, background: `${c.icon_color || "#6366f1"}18`, color: c.icon_color || "#6366f1" }}>
+                  {c.campo_conhecimento}
+                </span>
+              )}
+              <p style={{ margin: "0 0 4px", fontWeight: 600, fontSize: "0.9rem", color: "#0f172a" }}>{c.title}</p>
+              <p style={{ margin: "0 0 8px", fontSize: "0.8rem", color: "#64748b", lineHeight: 1.4 }}>
+                {c.description ? (c.description.length > 90 ? c.description.slice(0, 87) + "…" : c.description) : <span style={{ color: "#cbd5e1", fontStyle: "italic" }}>Sem descrição</span>}
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                {(c.tags || "").split(",").filter(Boolean).map((t, i) => (
+                  <span key={i} style={{ fontSize: "0.7rem", padding: "2px 8px", borderRadius: 99, background: "#f1f5f9", color: "#475569" }}>{t.trim()}</span>
+                ))}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
