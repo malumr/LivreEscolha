@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 // ─── Substitua pelo seu Google Client ID ─────────────────────────────────────
 const GOOGLE_CLIENT_ID = "SEU_CLIENT_ID_AQUI.apps.googleusercontent.com";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 async function api(method, path, body, sessionId) {
   const res = await fetch(`${API}${path}`, {
@@ -1807,7 +1807,7 @@ function RotaCompletedScreen({ sessionId, onHome, onGoToPlan }) {
 }
 
 // ─── SCREEN: PLANO DE VOO ─────────────────────────────────────────────────────
-function PlanoDeVooScreen({ onBack, career: careerProp, onHome, sessionId }) {
+function PlanoDeVooScreen({ onBack, career: careerProp, onHome, onFinish, sessionId }) {
   const steps = [
     { title: "Concluir ensino médio", desc: "Mantenha boas notas especialmente em matemática e lógica" },
     { title: "Escolher curso superior", desc: "Pesquise sobre Ciência da Computação, Sistemas de Informação ou cursos relacionados" },
@@ -1894,10 +1894,146 @@ function PlanoDeVooScreen({ onBack, career: careerProp, onHome, sessionId }) {
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "2rem" }}>
           <p style={{ color: "#64748b", fontSize: "0.875rem", margin: 0 }}>{done} de {steps.length} etapas concluídas</p>
-          <Btn style={{ padding: "0.875rem 2rem" }}>
+          <Btn onClick={onFinish} style={{ padding: "0.875rem 2rem" }}>
             Finalizar Jornada <Icon name="arrow-right" size={18} />
           </Btn>
         </div>
+      </div>
+    </Page>
+  );
+}
+
+// ─── SCREEN: CONCLUSÃO ───────────────────────────────────────────────────────
+function ConclusaoScreen({ career, onDashboard, onRevisar, onHome }) {
+  return (
+    <Page>
+      <div style={{ maxWidth: 680, margin: "0 auto", width: "100%", paddingBottom: "3rem" }}>
+
+        {/* ── Hero ── */}
+        <div style={{ textAlign: "center", padding: "2.5rem 1rem 2rem" }}>
+          <div style={{
+            width: 88, height: 88, borderRadius: "50%",
+            background: "linear-gradient(135deg, #fef9c3 0%, #fde68a 100%)",
+            border: "3px solid #fbbf24",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 1.25rem",
+            fontSize: "2.5rem",
+            boxShadow: "0 8px 32px rgba(251,191,36,0.25)",
+          }}>
+            🏆
+          </div>
+          <h1 style={{ fontSize: "2.2rem", fontWeight: 800, color: "#0f172a", margin: "0 0 0.5rem", letterSpacing: "-0.03em" }}>
+            Parabéns!
+          </h1>
+          <p style={{ color: "#64748b", fontSize: "1rem", margin: 0, lineHeight: 1.6 }}>
+            Você completou sua jornada de autoconhecimento
+          </p>
+        </div>
+
+        {/* ── Área Recomendada ── */}
+        <div style={{
+          ...cardStyle,
+          padding: "2rem",
+          marginBottom: "1.25rem",
+          background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+          border: "1.5px solid #93c5fd",
+        }}>
+          <p style={{
+            fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.09em",
+            color: "#1d4ed8", margin: "0 0 0.5rem", textTransform: "uppercase",
+          }}>
+            Área Recomendada
+          </p>
+          <h2 style={{
+            fontSize: "1.75rem", fontWeight: 800, color: "#1e40af",
+            margin: "0 0 0.5rem", letterSpacing: "-0.02em", lineHeight: 1.2,
+          }}>
+            {career?.campo_conhecimento || career?.title || "Sua Área Profissional"}
+          </h2>
+          {career?.title && career?.campo_conhecimento && (
+            <p style={{ color: "#1d4ed8", fontSize: "0.9rem", margin: 0, fontWeight: 500 }}>
+              com foco em <strong>{career.title}</strong>
+            </p>
+          )}
+        </div>
+
+        {/* ── 3 mini cards ── */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "0.875rem", marginBottom: "1.25rem",
+        }}>
+          {[
+            { icon: "sparkles", label: "Seu Potencial",    desc: "Identificado e mapeado", bg: "#f0fdf4", border: "#86efac", color: "#16a34a" },
+            { icon: "target",   label: "Objetivos Claros", desc: "Metas bem definidas",    bg: "#eff6ff", border: "#93c5fd", color: "#2563eb" },
+            { icon: "plane",    label: "Plano de Ação",    desc: "Pronto para decolar",    bg: "#fff7ed", border: "#fdba74", color: "#ea580c" },
+          ].map(({ icon, label, desc, bg: cardBg, border, color }) => (
+            <div key={label} style={{
+              ...cardStyle,
+              padding: "1.25rem 1rem",
+              background: cardBg,
+              border: `1.5px solid ${border}`,
+              textAlign: "center",
+            }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: "50%",
+                background: "#fff",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 0.75rem",
+                color,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              }}>
+                <Icon name={icon} size={18} />
+              </div>
+              <p style={{ fontSize: "0.82rem", fontWeight: 700, color: "#0f172a", margin: "0 0 2px" }}>{label}</p>
+              <p style={{ fontSize: "0.72rem", color: "#64748b", margin: 0 }}>{desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Mensagem motivacional ── */}
+        <div style={{
+          ...cardStyle,
+          padding: "1.5rem",
+          marginBottom: "2rem",
+          background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)",
+          border: "1.5px solid #86efac",
+        }}>
+          <div style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: "50%",
+              background: "#dcfce7",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0, color: "#16a34a",
+            }}>
+              <Icon name="star" size={16} />
+            </div>
+            <div>
+              <p style={{ fontSize: "0.9rem", fontWeight: 700, color: "#166534", margin: "0 0 4px" }}>
+                Sua jornada está apenas começando!
+              </p>
+              <p style={{ fontSize: "0.85rem", color: "#166534", margin: 0, lineHeight: 1.65, opacity: 0.85 }}>
+                Você deu o primeiro e mais importante passo: se conhecer melhor.
+                Agora use seu Plano de Voo para transformar seus objetivos em realidade — um passo de cada vez.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Botões ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <Btn onClick={onDashboard} style={{ width: "100%", padding: "1rem" }}>
+            <Icon name="home" size={18} /> Ver Dashboard
+          </Btn>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+            <Btn variant="outline" onClick={onRevisar} style={{ padding: "0.9rem" }}>
+              <Icon name="check-square" size={16} /> Revisar Plano de Ação
+            </Btn>
+            <Btn variant="outline" onClick={onHome} style={{ padding: "0.9rem" }}>
+              <Icon name="arrow-left" size={16} /> Voltar ao Início
+            </Btn>
+          </div>
+        </div>
+
       </div>
     </Page>
   );
@@ -2195,7 +2331,17 @@ export default function App() {
       onBack={() => setScreen("rota")}
       career={planCareer}
       onHome={() => setScreen("jornada")}
+      onFinish={() => setScreen("conclusao")}
       sessionId={sessionId}
+    />
+  );
+
+  if (screen === "conclusao") return (
+    <ConclusaoScreen
+      career={planCareer}
+      onDashboard={() => setScreen("jornada")}
+      onRevisar={() => setScreen("plano")}
+      onHome={() => setScreen("jornada")}
     />
   );
 

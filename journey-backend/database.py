@@ -1,14 +1,21 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# SQLite local — para produção, troque pela string do seu banco (PostgreSQL, etc.)
-DATABASE_URL = "sqlite:///./journey.db"
+# Em produção, defina a variável de ambiente DATABASE_URL com a string do PostgreSQL.
+# Localmente, usa SQLite por padrão.
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./journey.db")
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}  # Necessário para SQLite
-)
+# O Render entrega URLs PostgreSQL com prefixo "postgres://", mas o SQLAlchemy
+# exige "postgresql://". Esta linha corrige automaticamente.
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# SQLite precisa do argumento check_same_thread; PostgreSQL não aceita isso.
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
