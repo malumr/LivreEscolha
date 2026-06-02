@@ -420,6 +420,18 @@ def get_recommendation(session_id: str, db: Session = Depends(get_db)):
         "title": career.title,
         "description": career.description,
         "icon_color": career.icon_color,
+        "tags": career.tags,
+        "campo_conhecimento": career.campo_conhecimento,
+        "descricao_campo": career.descricao_campo,
+        "areas_atuacao": career.areas_atuacao,
+        "habilidades_essenciais": career.habilidades_essenciais,
+        "tendencias_mercado": career.tendencias_mercado,
+        "potencial_renda": career.potencial_renda,
+        "requisitos_formacao": career.requisitos_formacao,
+        "ambiente_trabalho": career.ambiente_trabalho,
+        "possibilidades_crescimento": career.possibilidades_crescimento,
+        "desafios_desvantagens": career.desafios_desvantagens,
+        "proximos_passos": career.proximos_passos,
         "note": rec.note,
     }
 

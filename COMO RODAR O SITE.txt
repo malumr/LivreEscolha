@@ -1,0 +1,47 @@
+╔══════════════════════════════════════════════════════╗
+║           COMO RODAR O SITE - PRÓXIMO DESTINO        ║
+╚══════════════════════════════════════════════════════╝
+
+Você vai precisar de 2 terminais abertos ao mesmo tempo.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PRIMEIRA VEZ APENAS — Instalar dependências
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Na pasta "journey-backend", rode:
+    pip install -r requirements.txt
+
+  Na pasta "journey-frontend", rode:
+    npm install
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TODA VEZ QUE FOR USAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Terminal 1 — Backend (servidor):
+
+    Entre na pasta "journey-backend" e rode:
+      uvicorn main:app --reload
+
+  Terminal 2 — Frontend (site):
+
+    Entre na pasta "journey-frontend" e rode:
+      npm run dev
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ACESSAR O SITE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Abra o navegador e acesse:
+    http://localhost:5173
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PARA PARAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Em cada terminal pressione Ctrl + C
+
