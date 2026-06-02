@@ -457,5 +457,36 @@ def seed_database(db: Session = Depends(get_db)):
     return {"status": "ok", "message": "Banco populado com sucesso!"}
 
 
+@app.post("/admin/import-careers", tags=["admin"])
+def import_careers(careers_data: list[dict], db: Session = Depends(get_db)):
+    """Importa lista de carreiras em massa (uso único para migração)."""
+    inserted = 0
+    for c in careers_data:
+        existing = db.query(models.Career).filter(models.Career.title == c.get("title")).first()
+        if not existing:
+            career = models.Career(
+                title=c.get("title"),
+                description=c.get("description"),
+                icon=c.get("icon"),
+                icon_color=c.get("icon_color"),
+                tags=c.get("tags", ""),
+                campo_conhecimento=c.get("campo_conhecimento"),
+                descricao_campo=c.get("descricao_campo"),
+                areas_atuacao=c.get("areas_atuacao"),
+                tendencias_mercado=c.get("tendencias_mercado"),
+                potencial_renda=c.get("potencial_renda"),
+                requisitos_formacao=c.get("requisitos_formacao"),
+                habilidades_essenciais=c.get("habilidades_essenciais"),
+                ambiente_trabalho=c.get("ambiente_trabalho"),
+                possibilidades_crescimento=c.get("possibilidades_crescimento"),
+                desafios_desvantagens=c.get("desafios_desvantagens"),
+                proximos_passos=c.get("proximos_passos"),
+            )
+            db.add(career)
+            inserted += 1
+    db.commit()
+    return {"status": "ok", "inserted": inserted}
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
