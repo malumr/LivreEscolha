@@ -4,7 +4,8 @@ import App from "./App.jsx";
 import Admin from "./Admin.jsx";
 
 const isAdmin = window.location.pathname === "/admin" ||
-  new URLSearchParams(window.location.search).has("admin");
+  new URLSearchParams(window.location.search).has("admin") ||
+  window.location.hash === "#admin";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
