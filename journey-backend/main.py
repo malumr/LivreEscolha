@@ -170,22 +170,6 @@ def delete_account(payload: schemas.DeleteAccount, db: Session = Depends(get_db)
     return {"status": "ok"}
 
 
-@app.delete("/admin/force-delete-user/{email}", tags=["admin"])
-def force_delete_user(email: str, db: Session = Depends(get_db)):
-    """[TEMPORÁRIO] Apaga um usuário pelo email sem precisar de senha."""
-    user = crud.get_user_by_email(db, email)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
-    db.query(models.Answer).filter(models.Answer.session_id == email).delete()
-    db.query(models.ModuleProgress).filter(models.ModuleProgress.session_id == email).delete()
-    db.query(models.CareerSelection).filter(models.CareerSelection.session_id == email).delete()
-    db.query(models.DefinitiveCareer).filter(models.DefinitiveCareer.session_id == email).delete()
-    db.query(models.AdminRecommendation).filter(models.AdminRecommendation.session_id == email).delete()
-    db.query(models.UserSession).filter(models.UserSession.id == email).delete()
-    db.delete(user)
-    db.commit()
-    return {"status": "ok", "message": f"Usuário {email} apagado com sucesso."}
-
 
 @app.post("/auth/reset-password")
 def reset_password(payload: schemas.ResetPassword, db: Session = Depends(get_db)):
