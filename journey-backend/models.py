@@ -15,6 +15,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     name = Column(String(100), nullable=False)
     password_hash = Column(String(255), nullable=False)
+    is_google = Column(Boolean, default=False, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 

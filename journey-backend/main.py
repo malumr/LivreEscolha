@@ -56,6 +56,17 @@ def send_reset_email(to_email: str, name: str, token: str):
 # Cria as tabelas no banco
 models.Base.metadata.create_all(bind=engine)
 
+# Migração: adiciona coluna is_google se não existir
+try:
+    from database import engine as _engine
+    with _engine.connect() as _conn:
+        _conn.execute(__import__("sqlalchemy").text(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_google BOOLEAN DEFAULT FALSE"
+        ))
+        _conn.commit()
+except Exception:
+    pass
+
 app = FastAPI(
     title="Sua Jornada API",
     description="Backend para o app de desenvolvimento de carreira",
@@ -142,7 +153,9 @@ def google_complete_register(payload: schemas.GoogleCompleteRegister, db: Sessio
     if len(payload.password) < 6:
         raise HTTPException(status_code=400, detail="A senha deve ter pelo menos 6 caracteres.")
 
-    crud.create_user(db, email, payload.name.strip(), payload.password)
+    user = crud.create_user(db, email, payload.name.strip(), payload.password)
+    user.is_google = True
+    db.commit()
     crud.get_or_create_session(db, email)
     return {"session_id": email, "email": email, "name": payload.name.strip()}
 
@@ -365,7 +378,7 @@ def admin_list_users(db: Session = Depends(get_db)):
             "name": u.name,
             "email": u.email,
             "created_at": u.created_at,
-            "login_type": "email" if u.password_hash else "google",
+            "login_type": "google" if u.is_google else "email",
             "modules_completed": modules_completed,
             "selected_careers": selected_careers,
             "definitive_career": definitive_career,
