@@ -17,26 +17,20 @@ import crud
 from career_engine import recommend_careers
 
 # ─── CONFIG DE EMAIL ──────────────────────────────────────────────────────────
-SMTP_HOST     = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT     = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER     = os.getenv("SMTP_USER", "")
-SMTP_PASS     = os.getenv("SMTP_PASS", "")
-FRONTEND_URL  = os.getenv("FRONTEND_URL", "http://localhost:5173")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+FRONTEND_URL   = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 def send_reset_email(to_email: str, name: str, token: str):
     reset_url = f"{FRONTEND_URL}?token={token}"
-    # Se não houver credenciais configuradas, imprime o link no terminal
-    if not SMTP_USER or not SMTP_PASS:
+
+    if not RESEND_API_KEY:
         print(f"\n[RESET DE SENHA] Link para {to_email}:\n{reset_url}\n")
         return
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "Redefinição de senha — Próximo Destino"
-    msg["From"]    = SMTP_USER
-    msg["To"]      = to_email
+
     html = f"""
     <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:2rem">
       <h2 style="color:#0f172a">Olá, {name}!</h2>
-      <p style="color:#475569">Recebemos uma solicitação para redefinir a senha da sua conta.</p>
+      <p style="color:#475569">Recebemos uma solicitação para redefinir a senha da sua conta no <strong>Próximo Destino</strong>.</p>
       <a href="{reset_url}"
          style="display:inline-block;background:#0f172a;color:#fff;padding:12px 28px;
                 border-radius:10px;text-decoration:none;font-weight:600;margin:1rem 0">
@@ -47,11 +41,25 @@ def send_reset_email(to_email: str, name: str, token: str):
         Se você não solicitou a redefinição, ignore este email.
       </p>
     </div>"""
-    msg.attach(MIMEText(html, "html"))
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.sendmail(SMTP_USER, to_email, msg.as_string())
+
+    payload = _json.dumps({
+        "from": "Próximo Destino <onboarding@resend.dev>",
+        "to": [to_email],
+        "subject": "Redefinição de senha — Próximo Destino",
+        "html": html,
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        resp.read()
 
 # Cria as tabelas no banco
 models.Base.metadata.create_all(bind=engine)
