@@ -343,6 +343,13 @@ function LoginScreen({ onLogin, onRegister, onForgotPassword, successMsg }) {
   const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Fluxo Google novo usuário
+  const [googleStep, setGoogleStep] = useState(false);
+  const [googleToken, setGoogleToken] = useState("");
+  const [googleNome, setGoogleNome] = useState("");
+  const [googleSenha, setGoogleSenha] = useState("");
+  const [googleConfirmar, setGoogleConfirmar] = useState("");
+
   async function handleLogin() {
     if (!email || !senha) { setErro("Preencha email e senha."); return; }
     setLoading(true); setErro("");
@@ -358,11 +365,52 @@ function LoginScreen({ onLogin, onRegister, onForgotPassword, successMsg }) {
     setLoading(true); setErro("");
     try {
       const data = await api("POST", "/auth/google", { token: credential });
-      onLogin({ email: data.email, name: data.name, sessionId: data.session_id });
+      if (data.new_user) {
+        setGoogleToken(credential);
+        setGoogleNome(data.google_name || "");
+        setGoogleStep(true);
+      } else {
+        onLogin({ email: data.email, name: data.name, sessionId: data.session_id });
+      }
     } catch (e) {
       setErro(e.message || "Erro ao entrar com Google.");
     } finally { setLoading(false); }
   }
+
+  async function handleGoogleComplete() {
+    if (!googleNome.trim()) { setErro("Digite seu nome completo."); return; }
+    if (googleSenha.length < 6) { setErro("A senha deve ter pelo menos 6 caracteres."); return; }
+    if (googleSenha !== googleConfirmar) { setErro("As senhas não coincidem."); return; }
+    setLoading(true); setErro("");
+    try {
+      const data = await api("POST", "/auth/google/complete", { token: googleToken, name: googleNome.trim(), password: googleSenha });
+      onLogin({ email: data.email, name: data.name, sessionId: data.session_id });
+    } catch (e) {
+      setErro(e.message || "Erro ao criar conta.");
+    } finally { setLoading(false); }
+  }
+
+  if (googleStep) return (
+    <Page center>
+      <div style={{ ...cardStyle, width: "100%", maxWidth: "420px", padding: "2.5rem" }}>
+        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎉</div>
+          <h1 style={{ fontSize: "1.4rem", fontWeight: "700", color: "#0f172a", margin: "0 0 6px" }}>Quase lá!</h1>
+          <p style={{ color: "#64748b", fontSize: "0.875rem", margin: 0 }}>Confirme seus dados e defina uma senha para sua conta</p>
+        </div>
+        <InputField label="Nome completo" value={googleNome} onChange={e => setGoogleNome(e.target.value)} placeholder="Seu nome" />
+        <InputField label="Criar senha" type="password" value={googleSenha} onChange={e => setGoogleSenha(e.target.value)} placeholder="Mínimo 6 caracteres" />
+        <InputField label="Confirmar senha" type="password" value={googleConfirmar} onChange={e => setGoogleConfirmar(e.target.value)} placeholder="Repita a senha" onKeyDown={e => e.key === "Enter" && handleGoogleComplete()} />
+        {erro && <p style={{ color: "#ef4444", fontSize: "0.8rem", margin: "0 0 0.75rem" }}>{erro}</p>}
+        <Btn onClick={handleGoogleComplete} disabled={loading} style={{ width: "100%", marginBottom: "0.75rem" }}>
+          {loading ? "Criando conta..." : <><Icon name="check" size={18} /> Criar minha conta</>}
+        </Btn>
+        <Btn variant="ghost" onClick={() => { setGoogleStep(false); setErro(""); }} style={{ width: "100%", fontSize: "0.85rem" }}>
+          Cancelar
+        </Btn>
+      </div>
+    </Page>
+  );
 
   return (
     <Page center>
@@ -534,15 +582,63 @@ function RegisterScreen({ onBack, onSuccess, onLogin }) {
     } finally { setLoading(false); }
   }
 
+  // Fluxo Google novo usuário
+  const [googleStep, setGoogleStep] = useState(false);
+  const [googleToken, setGoogleToken] = useState("");
+  const [googleNome, setGoogleNome] = useState("");
+  const [googleSenha, setGoogleSenha] = useState("");
+  const [googleConfirmar, setGoogleConfirmar] = useState("");
+
   async function handleGoogleCredential(credential) {
     setLoading(true); setErro("");
     try {
       const data = await api("POST", "/auth/google", { token: credential });
-      onLogin({ email: data.email, name: data.name, sessionId: data.session_id });
+      if (data.new_user) {
+        setGoogleToken(credential);
+        setGoogleNome(data.google_name || "");
+        setGoogleStep(true);
+      } else {
+        onLogin({ email: data.email, name: data.name, sessionId: data.session_id });
+      }
     } catch (e) {
       setErro(e.message || "Erro ao entrar com Google.");
     } finally { setLoading(false); }
   }
+
+  async function handleGoogleComplete() {
+    if (!googleNome.trim()) { setErro("Digite seu nome completo."); return; }
+    if (googleSenha.length < 6) { setErro("A senha deve ter pelo menos 6 caracteres."); return; }
+    if (googleSenha !== googleConfirmar) { setErro("As senhas não coincidem."); return; }
+    setLoading(true); setErro("");
+    try {
+      const data = await api("POST", "/auth/google/complete", { token: googleToken, name: googleNome.trim(), password: googleSenha });
+      onLogin({ email: data.email, name: data.name, sessionId: data.session_id });
+    } catch (e) {
+      setErro(e.message || "Erro ao criar conta.");
+    } finally { setLoading(false); }
+  }
+
+  if (googleStep) return (
+    <Page center>
+      <div style={{ ...cardStyle, width: "100%", maxWidth: "420px", padding: "2.5rem" }}>
+        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎉</div>
+          <h1 style={{ fontSize: "1.4rem", fontWeight: "700", color: "#0f172a", margin: "0 0 6px" }}>Quase lá!</h1>
+          <p style={{ color: "#64748b", fontSize: "0.875rem", margin: 0 }}>Confirme seus dados e defina uma senha para sua conta</p>
+        </div>
+        <InputField label="Nome completo" value={googleNome} onChange={e => setGoogleNome(e.target.value)} placeholder="Seu nome" />
+        <InputField label="Criar senha" type="password" value={googleSenha} onChange={e => setGoogleSenha(e.target.value)} placeholder="Mínimo 6 caracteres" />
+        <InputField label="Confirmar senha" type="password" value={googleConfirmar} onChange={e => setGoogleConfirmar(e.target.value)} placeholder="Repita a senha" onKeyDown={e => e.key === "Enter" && handleGoogleComplete()} />
+        {erro && <p style={{ color: "#ef4444", fontSize: "0.8rem", margin: "0 0 0.75rem" }}>{erro}</p>}
+        <Btn onClick={handleGoogleComplete} disabled={loading} style={{ width: "100%", marginBottom: "0.75rem" }}>
+          {loading ? "Criando conta..." : <><Icon name="check" size={18} /> Criar minha conta</>}
+        </Btn>
+        <Btn variant="ghost" onClick={() => { setGoogleStep(false); setErro(""); }} style={{ width: "100%", fontSize: "0.85rem" }}>
+          Cancelar
+        </Btn>
+      </div>
+    </Page>
+  );
 
   return (
     <Page center>

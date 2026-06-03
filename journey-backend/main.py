@@ -97,28 +97,54 @@ def login(payload: schemas.UserLogin, db: Session = Depends(get_db)):
     return {"session_id": user.email, "email": user.email, "name": user.name}
 
 
-@app.post("/auth/google", response_model=schemas.UserLoginOut)
-def google_auth(payload: schemas.GoogleLogin, db: Session = Depends(get_db)):
-    """Verifica o token Google e faz login ou cria conta automaticamente."""
+def _verify_google_token(token: str) -> dict:
+    """Valida o token Google e retorna as informações do usuário."""
     try:
-        url = f"https://oauth2.googleapis.com/tokeninfo?id_token={payload.token}"
+        url = f"https://oauth2.googleapis.com/tokeninfo?id_token={token}"
         with urllib.request.urlopen(url, timeout=10) as resp:
             info = _json.loads(resp.read())
     except Exception:
         raise HTTPException(status_code=401, detail="Token Google inválido.")
-
     email = info.get("email")
     if not email or info.get("email_verified") != "true":
         raise HTTPException(status_code=401, detail="Email Google não verificado.")
+    return info
 
+
+@app.post("/auth/google")
+def google_auth(payload: schemas.GoogleLogin, db: Session = Depends(get_db)):
+    """Verifica o token Google. Se usuário já existe, faz login.
+    Se é novo, retorna new_user=True para o frontend solicitar nome e senha."""
+    info = _verify_google_token(payload.token)
+    email = info.get("email")
     name = info.get("name") or info.get("given_name") or email.split("@")[0]
 
     user = crud.get_user_by_email(db, email)
     if not user:
-        user = crud.create_google_user(db, email, name)
+        # Novo usuário — pede nome e senha antes de criar
+        return {"new_user": True, "google_name": name, "google_email": email}
 
+    # Usuário existente — login direto
     crud.get_or_create_session(db, user.email)
-    return {"session_id": user.email, "email": user.email, "name": user.name}
+    return {"new_user": False, "session_id": user.email, "email": user.email, "name": user.name}
+
+
+@app.post("/auth/google/complete", response_model=schemas.UserLoginOut)
+def google_complete_register(payload: schemas.GoogleCompleteRegister, db: Session = Depends(get_db)):
+    """Conclui o cadastro Google com nome e senha definidos pelo usuário."""
+    info = _verify_google_token(payload.token)
+    email = info.get("email")
+
+    if crud.get_user_by_email(db, email):
+        raise HTTPException(status_code=400, detail="Este email já está cadastrado.")
+    if not payload.name.strip():
+        raise HTTPException(status_code=400, detail="O nome é obrigatório.")
+    if len(payload.password) < 6:
+        raise HTTPException(status_code=400, detail="A senha deve ter pelo menos 6 caracteres.")
+
+    crud.create_user(db, email, payload.name.strip(), payload.password)
+    crud.get_or_create_session(db, email)
+    return {"session_id": email, "email": email, "name": payload.name.strip()}
 
 
 @app.post("/auth/forgot-password")

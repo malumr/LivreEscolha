@@ -22,6 +22,16 @@ class UserLoginOut(BaseModel):
 class GoogleLogin(BaseModel):
     token: str
 
+class GoogleCompleteRegister(BaseModel):
+    token: str
+    name: str
+    password: str
+
+class GoogleCheckOut(BaseModel):
+    new_user: bool
+    google_name: Optional[str] = None
+    google_email: Optional[str] = None
+
 class ForgotPassword(BaseModel):
     email: str
 
