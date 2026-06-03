@@ -521,6 +521,8 @@ function RegisterScreen({ onBack, onSuccess, onLogin }) {
 
   async function handleRegister() {
     if (!nome.trim() || !email || !senha || !confirmar) { setErro("Preencha todos os campos."); return; }
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+    if (!emailValido) { setErro("Digite um endereço de email válido."); return; }
     if (senha !== confirmar) { setErro("As senhas não coincidem."); return; }
     if (senha.length < 6) { setErro("A senha deve ter pelo menos 6 caracteres."); return; }
     setLoading(true); setErro("");
