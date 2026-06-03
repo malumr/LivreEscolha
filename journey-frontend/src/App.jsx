@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // ─── Substitua pelo seu Google Client ID ─────────────────────────────────────
-const GOOGLE_CLIENT_ID = "SEU_CLIENT_ID_AQUI.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "413006452699-finohlo1mekr314khtgad97dqs1cfk9v.apps.googleusercontent.com";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
