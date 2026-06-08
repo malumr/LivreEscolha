@@ -394,7 +394,6 @@ function LoginScreen({ onLogin, onRegister, onForgotPassword, successMsg }) {
     <Page center>
       <div style={{ ...cardStyle, width: "100%", maxWidth: "420px", padding: "2.5rem" }}>
         <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎉</div>
           <h1 style={{ fontSize: "1.4rem", fontWeight: "700", color: "#0f172a", margin: "0 0 6px" }}>Quase lá!</h1>
           <p style={{ color: "#64748b", fontSize: "0.875rem", margin: 0 }}>Confirme seus dados e defina uma senha para sua conta</p>
         </div>
@@ -622,7 +621,6 @@ function RegisterScreen({ onBack, onSuccess, onLogin }) {
     <Page center>
       <div style={{ ...cardStyle, width: "100%", maxWidth: "420px", padding: "2.5rem" }}>
         <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎉</div>
           <h1 style={{ fontSize: "1.4rem", fontWeight: "700", color: "#0f172a", margin: "0 0 6px" }}>Quase lá!</h1>
           <p style={{ color: "#64748b", fontSize: "0.875rem", margin: 0 }}>Confirme seus dados e defina uma senha para sua conta</p>
         </div>
