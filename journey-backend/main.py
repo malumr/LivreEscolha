@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -350,9 +350,16 @@ def get_career(career_id: int, db: Session = Depends(get_db)):
     return career
 
 
+ADMIN_SECRET = os.getenv("ADMIN_SECRET", "Marisa-LivreEscolha-2026")
+
+def verify_admin(x_admin_key: Optional[str] = Header(None)):
+    if x_admin_key != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Acesso negado.")
+
+
 # ─── ADMIN ────────────────────────────────────────────────────────────────────
 
-@app.get("/admin/users", tags=["admin"])
+@app.get("/admin/users", tags=["admin"], dependencies=[Depends(verify_admin)])
 def admin_list_users(db: Session = Depends(get_db)):
     """Lista todos os usuários cadastrados (email, nome, data de criação, tipo de login)."""
     users = db.query(models.User).order_by(models.User.created_at.desc()).all()
@@ -395,7 +402,7 @@ def admin_list_users(db: Session = Depends(get_db)):
     return {"users": result, "total": len(result)}
 
 
-@app.get("/admin/sessions", tags=["admin"])
+@app.get("/admin/sessions", tags=["admin"], dependencies=[Depends(verify_admin)])
 def admin_list_sessions(db: Session = Depends(get_db)):
     """Lista todas as sessões com contagem de respostas e módulos concluídos."""
     sessions = db.query(models.UserSession).all()
@@ -426,7 +433,7 @@ def admin_list_sessions(db: Session = Depends(get_db)):
     }
 
 
-@app.delete("/admin/sessions/{session_id}", tags=["admin"])
+@app.delete("/admin/sessions/{session_id}", tags=["admin"], dependencies=[Depends(verify_admin)])
 def admin_delete_session(session_id: str, db: Session = Depends(get_db)):
     """Apaga uma sessão e todas as suas respostas e progresso."""
     db.query(models.Answer).filter(models.Answer.session_id == session_id).delete()
@@ -439,7 +446,7 @@ def admin_delete_session(session_id: str, db: Session = Depends(get_db)):
     return {"status": "ok", "message": "Sessão apagada com sucesso"}
 
 
-@app.post("/admin/sessions/{session_id}/recommend-career", tags=["admin"])
+@app.post("/admin/sessions/{session_id}/recommend-career", tags=["admin"], dependencies=[Depends(verify_admin)])
 def admin_recommend_career(session_id: str, payload: schemas.AdminRecommendationCreate, db: Session = Depends(get_db)):
     """Admin sugere/recomenda uma carreira para o usuário."""
     crud.get_or_create_session(db, session_id)
@@ -447,7 +454,7 @@ def admin_recommend_career(session_id: str, payload: schemas.AdminRecommendation
     return {"status": "ok"}
 
 
-@app.delete("/admin/sessions/{session_id}/recommend-career", tags=["admin"])
+@app.delete("/admin/sessions/{session_id}/recommend-career", tags=["admin"], dependencies=[Depends(verify_admin)])
 def admin_delete_recommendation(session_id: str, db: Session = Depends(get_db)):
     """Remove a recomendação de carreira feita pelo admin."""
     crud.delete_admin_recommendation(db, session_id)
@@ -484,7 +491,7 @@ def get_recommendation(session_id: str, db: Session = Depends(get_db)):
     }
 
 
-@app.delete("/admin/answers/{answer_id}", tags=["admin"])
+@app.delete("/admin/answers/{answer_id}", tags=["admin"], dependencies=[Depends(verify_admin)])
 def admin_delete_answer(answer_id: int, db: Session = Depends(get_db)):
     """Apaga uma resposta específica."""
     answer = db.query(models.Answer).filter(models.Answer.id == answer_id).first()
@@ -505,7 +512,7 @@ def seed_database(db: Session = Depends(get_db)):
     return {"status": "ok", "message": "Banco populado com sucesso!"}
 
 
-@app.post("/admin/import-careers", tags=["admin"])
+@app.post("/admin/import-careers", tags=["admin"], dependencies=[Depends(verify_admin)])
 def import_careers(careers_data: list[dict], db: Session = Depends(get_db)):
     """Importa lista de carreiras em massa (uso único para migração)."""
     inserted = 0
