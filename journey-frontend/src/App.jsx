@@ -2024,7 +2024,82 @@ function PlanoDeVooScreen({ onBack, career: careerProp, onHome, onFinish, sessio
 }
 
 // ─── SCREEN: CONCLUSÃO ───────────────────────────────────────────────────────
-function ConclusaoScreen({ career, onDashboard, onRevisar, onHome }) {
+function ConclusaoScreen({ career, userName, onDashboard, onRevisar, onHome }) {
+  function handleDownloadPDF() {
+    const hoje = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    const area = career?.campo_conhecimento || career?.title || "Sua Área Profissional";
+    const profissao = career?.title && career?.campo_conhecimento ? career.title : null;
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Meu Perfil de Carreira</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',system-ui,sans-serif;background:#fff;color:#0f172a;padding:40px;max-width:680px;margin:0 auto}
+    .header{text-align:center;margin-bottom:28px;padding-bottom:24px;border-bottom:2px solid #e2e8f0}
+    .app-name{font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px}
+    .trophy{font-size:48px;margin-bottom:10px}
+    h1{font-size:34px;font-weight:800;color:#0f172a;margin-bottom:4px}
+    .subtitle{color:#64748b;font-size:15px}
+    .name-box{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:20px}
+    .label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+    .name-value{font-size:22px;font-weight:700;color:#0f172a}
+    .career-box{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;border-radius:14px;padding:22px;margin-bottom:20px}
+    .career-label{font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px}
+    .career-area{font-size:26px;font-weight:800;color:#1e40af;margin-bottom:5px;line-height:1.2}
+    .career-focus{font-size:14px;color:#1d4ed8;font-weight:500}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+    .card{border-radius:12px;padding:16px;text-align:center}
+    .card-green{background:#f0fdf4;border:1.5px solid #86efac}
+    .card-blue{background:#eff6ff;border:1.5px solid #93c5fd}
+    .card-orange{background:#fff7ed;border:1.5px solid #fdba74}
+    .card-icon{font-size:22px;margin-bottom:8px}
+    .card-title{font-size:12px;font-weight:700;color:#0f172a;margin-bottom:3px}
+    .card-desc{font-size:11px;color:#64748b}
+    .motivational{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid #86efac;border-radius:12px;padding:18px 20px;margin-bottom:28px}
+    .motivational-title{font-size:14px;font-weight:700;color:#166534;margin-bottom:6px}
+    .motivational-text{font-size:13px;color:#166534;line-height:1.65;opacity:.9}
+    .footer{text-align:center;padding-top:18px;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:12px}
+    @media print{body{padding:20px}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <p class="app-name">Programa Próximo Destino</p>
+    <div class="trophy">🏆</div>
+    <h1>Parabéns!</h1>
+    <p class="subtitle">Você completou sua jornada de autoconhecimento</p>
+  </div>
+  <div class="name-box">
+    <p class="label">Participante</p>
+    <p class="name-value">${userName || "Participante"}</p>
+  </div>
+  <div class="career-box">
+    <p class="career-label">Área Recomendada</p>
+    <p class="career-area">${area}</p>
+    ${profissao ? `<p class="career-focus">com foco em <strong>${profissao}</strong></p>` : ""}
+  </div>
+  <div class="cards">
+    <div class="card card-green"><div class="card-icon">✨</div><p class="card-title">Seu Potencial</p><p class="card-desc">Identificado e mapeado</p></div>
+    <div class="card card-blue"><div class="card-icon">🎯</div><p class="card-title">Objetivos Claros</p><p class="card-desc">Metas bem definidas</p></div>
+    <div class="card card-orange"><div class="card-icon">✈️</div><p class="card-title">Plano de Ação</p><p class="card-desc">Pronto para decolar</p></div>
+  </div>
+  <div class="motivational">
+    <p class="motivational-title">⭐ Sua jornada está apenas começando!</p>
+    <p class="motivational-text">Você deu o primeiro e mais importante passo: se conhecer melhor. Agora use seu Plano de Voo para transformar seus objetivos em realidade — um passo de cada vez.</p>
+  </div>
+  <div class="footer">Emitido em ${hoje} · Programa Próximo Destino</div>
+  <script>window.onload=function(){window.print()}<\/script>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    if (win) { win.document.write(html); win.document.close(); }
+  }
+
   return (
     <Page>
       <div style={{ maxWidth: 680, margin: "0 auto", width: "100%", paddingBottom: "3rem" }}>
@@ -2144,6 +2219,28 @@ function ConclusaoScreen({ career, onDashboard, onRevisar, onHome }) {
           <Btn onClick={onDashboard} style={{ width: "100%", padding: "1rem" }}>
             <Icon name="home" size={18} /> Ver Dashboard
           </Btn>
+
+          {/* Botão PDF */}
+          <button
+            onClick={handleDownloadPDF}
+            style={{
+              width: "100%", padding: "1rem",
+              border: "1.5px solid #6366f1", borderRadius: 12,
+              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              color: "#fff", fontSize: "0.95rem", fontWeight: 600,
+              cursor: "pointer", fontFamily: font,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = "0.88"; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+          >
+            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Baixar meu Perfil em PDF
+          </button>
+
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
             <Btn variant="outline" onClick={onRevisar} style={{ padding: "0.9rem" }}>
               <Icon name="check-square" size={16} /> Revisar Plano de Ação
@@ -2459,6 +2556,7 @@ export default function App() {
   if (screen === "conclusao") return (
     <ConclusaoScreen
       career={planCareer}
+      userName={userName}
       onDashboard={() => setScreen("jornada")}
       onRevisar={() => setScreen("plano")}
       onHome={() => setScreen("jornada")}
