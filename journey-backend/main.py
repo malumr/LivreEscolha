@@ -536,5 +536,22 @@ def import_careers(careers_data: list[dict], db: Session = Depends(get_db)):
     return {"status": "ok", "inserted": inserted}
 
 
+@app.delete("/admin/cleanup-empty-careers", tags=["admin"])
+def cleanup_empty_careers(db: Session = Depends(get_db)):
+    """[TEMPORÁRIO] Apaga profissões sem campo_conhecimento (as vazias/duplicadas do seed)."""
+    vazias = db.query(models.Career).filter(
+        (models.Career.campo_conhecimento == None) | (models.Career.campo_conhecimento == "")
+    ).all()
+    titulos = [c.title for c in vazias]
+    for c in vazias:
+        # Remove dependências antes de apagar a carreira
+        db.query(models.CareerSelection).filter(models.CareerSelection.career_id == c.id).delete()
+        db.query(models.DefinitiveCareer).filter(models.DefinitiveCareer.career_id == c.id).delete()
+        db.query(models.AdminRecommendation).filter(models.AdminRecommendation.career_id == c.id).delete()
+        db.delete(c)
+    db.commit()
+    return {"status": "ok", "removidas": len(titulos), "titulos": titulos}
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
