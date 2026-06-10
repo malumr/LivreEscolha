@@ -2,10 +2,14 @@ import { useState, useEffect, useRef } from "react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+let _adminKey = "";
+
 async function api(method, path, body) {
+  const headers = { "Content-Type": "application/json" };
+  if (_adminKey) headers["X-Admin-Key"] = _adminKey;
   const res = await fetch(`${API}${path}`, {
     method,
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) throw new Error(`${res.status}`);
@@ -730,6 +734,11 @@ function CareersTab({ careers }) {
 
 // ─── ADMIN APP ────────────────────────────────────────────────────────────────
 export default function Admin() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [keyInput, setKeyInput] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+
   const [tab, setTab] = useState("users");
   const [sessions, setSessions] = useState([]);
   const [users, setUsers] = useState([]);
@@ -759,7 +768,80 @@ export default function Admin() {
     }
   }
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { if (authenticated) loadData(); }, [authenticated]);
+
+  async function handleLogin() {
+    if (!keyInput.trim()) return;
+    setAuthLoading(true);
+    setAuthError("");
+    _adminKey = keyInput.trim();
+    try {
+      await api("GET", "/admin/users");
+      setAuthenticated(true);
+    } catch (e) {
+      _adminKey = "";
+      setAuthError(e.message === "401" ? "Senha incorreta. Tente novamente." : "Não foi possível conectar ao servidor.");
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  if (!authenticated) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#f8fafc", fontFamily: font, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
+        <div style={{ background: "#fff", borderRadius: 18, padding: "2rem 2.5rem", maxWidth: 400, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.1)", border: "1px solid #e2e8f0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "1.75rem" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 10, background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontSize: 18 }}>⚙️</span>
+            </div>
+            <div>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: "1rem", color: "#0f172a" }}>Painel Admin</p>
+              <p style={{ margin: 0, fontSize: "0.72rem", color: "#94a3b8" }}>Próximo Destino</p>
+            </div>
+          </div>
+
+          <p style={{ margin: "0 0 1.25rem", fontSize: "0.875rem", color: "#64748b" }}>
+            Digite a senha de acesso para continuar.
+          </p>
+
+          <label style={{ fontSize: "0.82rem", fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Senha</label>
+          <input
+            type="password"
+            value={keyInput}
+            onChange={e => setKeyInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleLogin()}
+            autoFocus
+            placeholder="••••••••••••••••"
+            style={{
+              width: "100%", height: 44, borderRadius: 10,
+              border: authError ? "1.5px solid #fca5a5" : "1.5px solid #e2e8f0",
+              background: "#f8fafc", padding: "0 14px", fontSize: "0.95rem",
+              fontFamily: font, outline: "none", boxSizing: "border-box",
+              marginBottom: authError ? "0.5rem" : "1.25rem",
+            }}
+          />
+
+          {authError && (
+            <p style={{ color: "#ef4444", fontSize: "0.82rem", margin: "0 0 1rem" }}>{authError}</p>
+          )}
+
+          <button
+            onClick={handleLogin}
+            disabled={!keyInput.trim() || authLoading}
+            style={{
+              width: "100%", padding: "0.8rem", borderRadius: 10, border: "none",
+              background: !keyInput.trim() || authLoading ? "#cbd5e1" : "#0f172a",
+              color: "#fff", fontSize: "0.9rem", fontWeight: 600,
+              cursor: !keyInput.trim() || authLoading ? "not-allowed" : "pointer",
+              fontFamily: font, transition: "background 0.15s",
+            }}
+          >
+            {authLoading ? "Verificando..." : "Entrar"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   async function handleDeleteSession(sessionId) {
     try {
