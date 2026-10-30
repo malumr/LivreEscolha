@@ -64,6 +64,16 @@ def send_reset_email(to_email: str, name: str, token: str):
 # Cria as tabelas no banco
 models.Base.metadata.create_all(bind=engine)
 
+# Seed automático se banco estiver vazio
+try:
+    from database import SessionLocal as _SL
+    from seed import run_seed as _run_seed
+    _db = _SL()
+    _run_seed(_db)
+    _db.close()
+except Exception as _e:
+    print(f"[seed] {_e}")
+
 # Migração: adiciona coluna is_google se não existir
 try:
     from database import engine as _engine
