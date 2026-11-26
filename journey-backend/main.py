@@ -553,5 +553,117 @@ def import_careers(careers_data: list[dict], db: Session = Depends(get_db)):
     return {"status": "ok", "inserted": inserted}
 
 
+# ─── MVP DE VALIDAÇÃO COMERCIAL ───────────────────────────────────────────────
+
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "")
+MVP_FROM    = os.getenv("MVP_FROM_EMAIL", "Livre Escolha <noreply@livreescolha.com.br>")
+
+
+def _send_mvp_email(to: str, subject: str, html: str):
+    """Envia e-mail via Resend API. Silencia se RESEND_API_KEY não configurada."""
+    if not RESEND_API_KEY or not to:
+        print(f"[MVP EMAIL] {subject} → {to} (sem RESEND_API_KEY, apenas log)")
+        return
+    try:
+        body = _json.dumps({"from": MVP_FROM, "to": [to], "subject": subject, "html": html}).encode()
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=body,
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=8)
+    except Exception as exc:
+        print(f"[MVP EMAIL ERROR] {exc}")
+
+
+def _mvp_confirmation_html(nome: str) -> str:
+    return f"""
+<div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px 24px;background:#f8f7ff">
+  <div style="background:#5b5fc7;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
+    <h1 style="color:#fff;margin:0;font-size:1.4rem">Livre Escolha 🧭</h1>
+    <p style="color:#c7c5ff;margin:8px 0 0;font-size:.9rem">Próximo Destino</p>
+  </div>
+  <h2 style="color:#1e1b4b">Olá, {nome}! Obrigado pelo seu interesse 💜</h2>
+  <p style="color:#4a4880;line-height:1.7">
+    Recebemos suas respostas com sucesso. A equipe da <strong>Livre Escolha</strong>
+    vai entrar em contato em breve com mais informações sobre o
+    <strong>Programa Próximo Destino</strong>.
+  </p>
+  <div style="background:#eef0ff;border-radius:12px;padding:20px;margin:24px 0">
+    <p style="margin:0;color:#5b5fc7;font-weight:700;font-size:.95rem">O que esperar:</p>
+    <ul style="color:#4a4880;line-height:1.9;padding-left:20px;margin:12px 0 0">
+      <li>Acesso à jornada completa de autoconhecimento</li>
+      <li>4 módulos: Mapa Interior → Horizonte Ampliado → Rota Definida → Plano de Voo</li>
+      <li>Plano de ação personalizado para sua carreira</li>
+      <li>Tudo por apenas <strong>R$ 19,00</strong></li>
+    </ul>
+  </div>
+  <p style="color:#7675a0;font-size:.82rem;margin-top:24px">
+    Livre Escolha · São Caetano do Sul, SP · <a href="https://livreescolha.vercel.app" style="color:#5b5fc7">livreescolha.vercel.app</a>
+  </p>
+</div>"""
+
+
+@app.post("/mvp/event", tags=["mvp"])
+def mvp_track_event(payload: dict, db: Session = Depends(get_db)):
+    """Registra evento de rastreamento do MVP (clique, scroll, demo, etc.)."""
+    try:
+        crud.mvp_track_event(
+            db,
+            session_id  = payload.get("session_id", "anonymous"),
+            event_type  = payload.get("event_type", "unknown"),
+            event_name  = payload.get("event_name", ""),
+            event_data  = _json.dumps(payload.get("data", {})),
+            utm_source  = payload.get("utm_source", ""),
+            utm_medium  = payload.get("utm_medium", ""),
+            utm_campaign= payload.get("utm_campaign", ""),
+        )
+    except Exception as exc:
+        print(f"[MVP EVENT ERROR] {exc}")
+    return {"ok": True}
+
+
+@app.post("/mvp/lead", tags=["mvp"])
+def mvp_submit_lead(payload: dict, db: Session = Depends(get_db)):
+    """Salva lead/survey do MVP e envia e-mail de confirmação."""
+    allowed = {
+        "session_id", "nome", "email", "whatsapp", "respondent_type",
+        "q1_autoconhecimento", "q2_acredita", "q3_atencao",
+        "q4_interesse", "q5_pagaria", "q6_objecao", "q7_mais_infos",
+        "intent_level", "utm_source", "utm_medium", "utm_campaign",
+        "utm_content", "device_type", "lgpd_consent",
+    }
+    data = {k: v for k, v in payload.items() if k in allowed}
+    lead = crud.mvp_save_lead(db, data)
+
+    # E-mail de confirmação ao usuário
+    nome  = data.get("nome") or "visitante"
+    email = data.get("email") or ""
+    _send_mvp_email(email, "✅ Recebemos seu interesse — Livre Escolha", _mvp_confirmation_html(nome))
+
+    # Notificação ao admin
+    if ADMIN_EMAIL:
+        _send_mvp_email(
+            ADMIN_EMAIL,
+            f"Novo lead MVP: {nome} ({data.get('intent_level','')})",
+            f"<pre>{_json.dumps(data, ensure_ascii=False, indent=2)}</pre>",
+        )
+
+    return {"ok": True, "id": lead.id}
+
+
+@app.get("/mvp/stats", tags=["mvp"], dependencies=[Depends(verify_admin)])
+def mvp_get_stats(db: Session = Depends(get_db)):
+    """Retorna métricas do MVP para o dashboard administrativo."""
+    return crud.mvp_get_stats(db)
+
+
+@app.get("/mvp/export", tags=["mvp"], dependencies=[Depends(verify_admin)])
+def mvp_export(db: Session = Depends(get_db)):
+    """Exporta todos os leads em formato JSON (use para gerar CSV no frontend)."""
+    return crud.mvp_export_csv(db)
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

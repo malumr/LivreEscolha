@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel MVP · Livre Escolha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Nunito:wght@700;800;900&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --p:#5b5fc7;--p2:#4f46e5;--acc:#f59e0b;
+  --bg:#f0f1fb;--surf:#fff;--sur2:#f8f7ff;--bdr:#dde0f7;
+  --fg:#1e1b4b;--fg2:#4a4880;--fg3:#7675a0;
+  --ok:#059669;--ok-bg:#ecfdf5;--err:#dc2626;--err-bg:#fef2f2;
+  --warn:#d97706;--warn-bg:#fffbeb;
+  --r:12px;--font-d:'Nunito',sans-serif;--font-b:'DM Sans',sans-serif;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f0e1a;--surf:#1a1830;--sur2:#221f35;--bdr:#2d2b4e;
+  --fg:#e8e6ff;--fg2:#a8a6cc;--fg3:#6a6895;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f0e1a;--surf:#1a1830;--sur2:#221f35;--bdr:#2d2b4e;
+  --fg:#e8e6ff;--fg2:#a8a6cc;--fg3:#6a6895;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:var(--bg);color:var(--fg);font-size:14px;line-height:1.6;min-height:100vh}
+img{max-width:100%}
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.login-card{background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:40px 36px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(91,95,199,.12)}
+.login-card h1{font-family:var(--font-d);font-weight:900;font-size:1.4rem;color:var(--fg);margin-bottom:4px}
+.login-card p{font-size:.88rem;color:var(--fg2);margin-bottom:28px}
+.lf-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.lf-group label{font-size:.8rem;font-weight:600;color:var(--fg2)}
+.lf-group input{background:var(--sur2);border:1.5px solid var(--bdr);border-radius:9px;padding:11px 13px;font-family:var(--font-b);font-size:.95rem;color:var(--fg);outline:none;transition:border-color .15s}
+.lf-group input:focus{border-color:var(--p)}
+.login-btn{width:100%;background:var(--p);color:#fff;border:none;border-radius:9px;padding:12px;font-family:var(--font-b);font-weight:700;font-size:.95rem;cursor:pointer;transition:background .15s}
+.login-btn:hover{background:var(--p2)}
+.login-err{background:var(--err-bg);color:var(--err);border-radius:8px;padding:10px 13px;font-size:.83rem;margin-top:12px;display:none}
+/* SHELL */
+.app{display:none;flex-direction:column;min-height:100vh}
+header{background:var(--surf);border-bottom:1px solid var(--bdr);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr-logo{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--p)}
+.hdr-logo span{color:var(--acc)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.btn-sm{background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;font-family:var(--font-b);font-size:.8rem;font-weight:600;color:var(--fg2);cursor:pointer;transition:background .15s}
+.btn-sm:hover{background:var(--bdr)}
+.btn-sm.primary{background:var(--p);color:#fff;border-color:var(--p)}
+.btn-sm.primary:hover{background:var(--p2)}
+main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}
+/* STATUS BAR */
+.status-bar{background:var(--warn-bg);border:1px solid #fed7aa;border-radius:9px;padding:10px 14px;font-size:.82rem;color:var(--warn);margin-bottom:20px;display:none}
+.status-bar.show{display:flex;align-items:center;gap:8px}
+/* METRICS ROW */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.metric{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 18px}
+.metric .m-label{font-size:.75rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.metric .m-value{font-family:var(--font-d);font-weight:900;font-size:1.8rem;color:var(--fg);line-height:1}
+.metric .m-sub{font-size:.75rem;color:var(--fg3);margin-top:4px}
+.metric.accent .m-value{color:var(--p)}
+.metric.ok .m-value{color:var(--ok)}
+.metric.warn .m-value{color:var(--warn)}
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.grid2,.grid3{grid-template-columns:1fr}}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:18px 20px}
+.card-title{font-weight:700;font-size:.88rem;color:var(--fg);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.card-title .ct-sub{font-size:.75rem;color:var(--fg3);font-weight:400;margin-left:auto}
+/* FUNNEL */
+.funnel{display:flex;flex-direction:column;gap:6px}
+.funnel-item{display:flex;align-items:center;gap:10px}
+.funnel-label{font-size:.8rem;color:var(--fg2);width:120px;flex-shrink:0}
+.funnel-bar{flex:1;height:20px;background:var(--sur2);border-radius:6px;overflow:hidden;position:relative}
+.funnel-fill{height:100%;border-radius:6px;background:var(--p);transition:width .6s ease}
+.funnel-pct{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.72rem;font-weight:700;color:#fff;mix-blend-mode:difference}
+.funnel-n{font-size:.78rem;font-weight:700;color:var(--fg2);width:36px;text-align:right}
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:.75rem;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-bottom:1px solid var(--bdr);text-align:left}
+td{font-size:.82rem;color:var(--fg2);padding:9px 10px;border-bottom:1px solid var(--sur2)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--sur2)}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.72rem;font-weight:700}
+.badge.ok{background:var(--ok-bg);color:var(--ok)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.badge.p{background:#ede9ff;color:var(--p)}
+/* CHART WRAP */
+.chart-wrap{position:relative;height:220px}
+/* SPINNER */
+.loading-screen{display:none;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:14px}
+.loading-screen.show{display:flex}
+.spin{width:36px;height:36px;border:3px solid var(--bdr);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{background:var(--err-bg);color:var(--err);border-radius:9px;padding:12px 16px;font-size:.88rem;text-align:center;max-width:420px}
+/* REFRESH */
+.last-updated{font-size:.75rem;color:var(--fg3)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <h1>Painel MVP</h1>
+    <p>Livre Escolha · Analytics de validação</p>
+    <div class="lf-group"><label>Chave de acesso</label><input type="password" id="admin-key" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-err" id="login-err">Chave incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div class="app" id="app">
+  <header>
+    <div class="hdr-logo">Livre<span>Escolha</span> <span style="font-weight:400;font-size:.85rem;color:var(--fg3);margin-left:4px">MVP · Painel</span></div>
+    <div class="hdr-right">
+      <span class="last-updated" id="last-updated"></span>
+      <button class="btn-sm" onclick="loadData()">↻ Atualizar</button>
+      <button class="btn-sm primary" onclick="exportCsv()">⬇ CSV</button>
+      <button class="btn-sm" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="status-bar" id="status-bar">⚠ <span id="status-msg"></span></div>
+
+    <div class="loading-screen show" id="loading-screen">
+      <div class="spin"></div>
+      <div style="font-size:.88rem;color:var(--fg3)">Carregando dados...</div>
+    </div>
+
+    <div id="dashboard" style="display:none">
+
+      <!-- KPIs -->
+      <div class="metrics" id="metrics-row"></div>
+
+      <!-- FUNNEL + DEVICE + UTM -->
+      <div class="grid3">
+        <div class="card">
+          <div class="card-title">Funil de conversão</div>
+          <div class="funnel" id="funnel-chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dispositivos</div>
+          <div class="chart-wrap"><canvas id="chart-device"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Origens (UTM)</div>
+          <div class="chart-wrap"><canvas id="chart-utm"></canvas></div>
+        </div>
+      </div>
+
+      <!-- SURVEY CHARTS -->
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Q4 — Interesse em usar <span class="ct-sub" id="q4-n"></span></div>
+          <div class="chart-wrap"><canvas id="chart-q4"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Q5 — Pagaria R$19? <span class="ct-sub" id="q5-n"></span></div>
+          <div class="chart-wrap"><canvas id="chart-q5"></canvas></div>
+        </div>
+      </div>
+
+      <!-- INTENT + TYPE -->
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Intenção declarada</div>
+          <div class="chart-wrap" style="height:160px"><canvas id="chart-intent"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Perfil respondente</div>
+          <div class="chart-wrap" style="height:160px"><canvas id="chart-type"></canvas></div>
+        </div>
+      </div>
+
+      <!-- RECENTES -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Leads recentes <span class="ct-sub" id="leads-n"></span></div>
+        <div class="table-wrap"><table id="leads-table"><thead><tr><th>Hora</th><th>Nome</th><th>Perfil</th><th>Q4 Interesse</th><th>Q5 Paga</th><th>Intenção</th></tr></thead><tbody id="leads-tbody"></tbody></table></div>
+      </div>
+
+    </div><!-- /dashboard -->
+  </main>
+</div>
+
+<script>
+const API = "https://livreescolha.onrender.com";
+const ADMIN_KEY = "Marisa-LivreEscolha-2026";
+let charts = {};
+
+// ── AUTH ──────────────────────────────────────────────────────────
+function doLogin() {
+  const val = document.getElementById("admin-key").value.trim();
+  if (val === ADMIN_KEY) {
+    try { sessionStorage.setItem("mvp_admin", "1"); } catch {}
+    document.getElementById("login-wrap").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    loadData();
+  } else {
+    document.getElementById("login-err").style.display = "block";
+  }
+}
+function logout() {
+  try { sessionStorage.removeItem("mvp_admin"); } catch {}
+  location.reload();
+}
+// Auto-login if already authenticated
+try {
+  if (sessionStorage.getItem("mvp_admin") === "1") {
+    document.getElementById("login-wrap").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    loadData();
+  }
+} catch {}
+
+// ── DATA ──────────────────────────────────────────────────────────
+async function loadData() {
+  document.getElementById("loading-screen").classList.add("show");
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("status-bar").classList.remove("show");
+
+  try {
+    const res = await fetch(API + "/mvp/stats", {
+      headers: { "X-Admin-Key": ADMIN_KEY }
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const d = await res.json();
+    renderDashboard(d);
+    document.getElementById("last-updated").textContent = "Atualizado: " + new Date().toLocaleTimeString("pt-BR");
+  } catch (err) {
+    showStatus("Não foi possível carregar dados. Verifique a conexão com a API (" + err.message + ")");
+  } finally {
+    document.getElementById("loading-screen").classList.remove("show");
+    document.getElementById("dashboard").style.display = "block";
+  }
+}
+
+function showStatus(msg) {
+  document.getElementById("status-msg").textContent = msg;
+  document.getElementById("status-bar").classList.add("show");
+}
+
+function renderDashboard(d) {
+  renderMetrics(d);
+  renderFunnel(d.funnel || {});
+  renderChart("chart-device", "doughnut", d.device || {}, PALETTE_DEVICE);
+  renderChart("chart-utm",    "bar",      d.utm_sources || {}, [PALETTE[0]]);
+  renderChart("chart-q4",     "bar",      d.q4_interesse || {}, PALETTE_YNN, true);
+  renderChart("chart-q5",     "bar",      d.pagaria || {}, PALETTE_YNN, true);
+  renderChart("chart-intent", "doughnut", d.intent || {}, PALETTE_INTENT);
+  renderChart("chart-type",   "doughnut", d.respondent_type || {}, PALETTE_TYPE);
+  renderLeads(d.recent_leads || []);
+
+  // Count labels
+  const total = d.total_leads || 0;
+  const q4total = Object.values(d.q4_interesse || {}).reduce((a,b)=>a+b,0);
+  const q5total = Object.values(d.pagaria || {}).reduce((a,b)=>a+b,0);
+  document.getElementById("q4-n").textContent = q4total + " resp.";
+  document.getElementById("q5-n").textContent = q5total + " resp.";
+  document.getElementById("leads-n").textContent = "últimos " + (d.recent_leads||[]).length;
+}
+
+function renderMetrics(d) {
+  const total = d.total_leads || 0;
+  const intencao = d.intencao_compra || 0;
+  const pct_intencao = total ? Math.round(intencao / total * 100) : 0;
+  const pagaria_sim = (d.pagaria||{}).sim || 0;
+  const pct_pagaria = total ? Math.round(pagaria_sim / total * 100) : 0;
+  const q4sim = (d.q4_interesse||{}).sim || 0;
+  const pct_interesse = total ? Math.round(q4sim / total * 100) : 0;
+
+  const metrics = [
+    { label: "Total de leads", value: total, sub: "formulários enviados", cls: "accent" },
+    { label: "Sessões únicas", value: d.unique_sessions || 0, sub: "visitantes rastreados", cls: "" },
+    { label: "Eventos totais", value: d.total_events || 0, sub: "cliques + visões", cls: "" },
+    { label: "Intenção de compra", value: pct_intencao + "%", sub: intencao + " de " + total + " leads", cls: "ok" },
+    { label: "Pagaria R$19", value: pct_pagaria + "%", sub: pagaria_sim + " disseram Sim", cls: pct_pagaria >= 50 ? "ok" : "warn" },
+    { label: "Interesse declarado", value: pct_interesse + "%", sub: q4sim + " disseram Sim", cls: pct_interesse >= 60 ? "ok" : "warn" },
+  ];
+
+  document.getElementById("metrics-row").innerHTML = metrics.map(m => `
+    <div class="metric ${m.cls}">
+      <div class="m-label">${m.label}</div>
+      <div class="m-value">${m.value}</div>
+      <div class="m-sub">${m.sub}</div>
+    </div>`).join("");
+}
+
+function renderFunnel(funnel) {
+  const steps = [
+    { key: "page_view",    label: "Visitantes" },
+    { key: "demo_start",   label: "Iniciou demo" },
+    { key: "survey_start", label: "Iniciou pesquisa" },
+    { key: "form_submit",  label: "Lead enviado" },
+  ];
+  const max = Math.max(...steps.map(s => funnel[s.key] || 0), 1);
+  document.getElementById("funnel-chart").innerHTML = steps.map(s => {
+    const n = funnel[s.key] || 0;
+    const pct = Math.round(n / max * 100);
+    return `<div class="funnel-item">
+      <span class="funnel-label">${s.label}</span>
+      <div class="funnel-bar"><div class="funnel-fill" style="width:${pct}%"></div><span class="funnel-pct">${pct}%</span></div>
+      <span class="funnel-n">${n}</span>
+    </div>`;
+  }).join("");
+}
+
+// ── CHART HELPERS ──────────────────────────────────────────────────
+const PALETTE       = ["#5b5fc7","#7c3aed","#f59e0b","#059669","#dc2626","#0ea5e9"];
+const PALETTE_YNN   = ["#059669","#f59e0b","#dc2626"];
+const PALETTE_DEVICE = ["#5b5fc7","#f59e0b","#7c3aed"];
+const PALETTE_INTENT = ["#5b5fc7","#059669"];
+const PALETTE_TYPE   = ["#7c3aed","#f59e0b"];
+
+const LABEL_MAPS = {
+  sim: "Sim", talvez: "Talvez", nao: "Não",
+  interesse: "Interesse", intencao_compra: "Intenção de compra",
+  jovem: "Jovem", responsavel: "Responsável",
+  mobile: "Mobile", desktop: "Desktop", tablet: "Tablet",
+  "": "Direto",
+};
+function label(k) { return LABEL_MAPS[k] || k || "Outro"; }
+
+function renderChart(id, type, dataObj, colors, horizontal) {
+  if (charts[id]) { charts[id].destroy(); }
+  const keys = Object.keys(dataObj);
+  const vals = Object.values(dataObj);
+  if (!keys.length) return;
+  const ctx = document.getElementById(id).getContext("2d");
+  const isDark = document.documentElement.dataset.theme === "dark" ||
+    (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme:dark)").matches);
+  const fg = isDark ? "#a8a6cc" : "#7675a0";
+  const gridColor = isDark ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.07)";
+
+  const cfg = {
+    type,
+    data: {
+      labels: keys.map(label),
+      datasets: [{ data: vals, backgroundColor: colors, borderWidth: 0, borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: horizontal ? "y" : "x",
+      plugins: {
+        legend: { display: type === "doughnut", labels: { color: fg, font: { family: "'DM Sans', sans-serif", size: 11 }, boxWidth: 12, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => " " + ctx.parsed.r ?? ctx.raw + (type === "doughnut" ? " (" + Math.round(ctx.raw / vals.reduce((a,b)=>a+b,0)*100) + "%)" : "") } }
+      },
+      scales: type === "doughnut" ? {} : {
+        x: { ticks: { color: fg, font: { size: 11 } }, grid: { color: gridColor } },
+        y: { ticks: { color: fg, font: { size: 11 } }, grid: { color: gridColor } }
+      },
+      cutout: type === "doughnut" ? "60%" : undefined,
+    }
+  };
+  charts[id] = new Chart(ctx, cfg);
+}
+
+// ── LEADS TABLE ────────────────────────────────────────────────────
+function renderLeads(leads) {
+  const tbody = document.getElementById("leads-tbody");
+  if (!leads.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--fg3);padding:20px">Nenhum lead ainda.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = leads.map(l => {
+    const hora = l.created_at ? new Date(l.created_at).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}) : "—";
+    const q4cls = l.q4_interesse === "sim" ? "ok" : l.q4_interesse === "nao" ? "" : "warn";
+    const q5cls = l.q5_pagaria === "sim" ? "ok" : l.q5_pagaria === "nao" ? "" : "warn";
+    const intcls = l.intent_level === "intencao_compra" ? "ok" : "p";
+    return `<tr>
+      <td>${hora}</td>
+      <td>${l.nome || "—"}</td>
+      <td><span class="badge p">${label(l.respondent_type||"")}</span></td>
+      <td><span class="badge ${q4cls}">${label(l.q4_interesse||"—")}</span></td>
+      <td><span class="badge ${q5cls}">${label(l.q5_pagaria||"—")}</span></td>
+      <td><span class="badge ${intcls}">${label(l.intent_level||"—")}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+// ── CSV EXPORT ─────────────────────────────────────────────────────
+async function exportCsv() {
+  try {
+    const res = await fetch(API + "/mvp/export", {
+      headers: { "X-Admin-Key": ADMIN_KEY }
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const rows = await res.json();
+    if (!rows.length) { showStatus("Sem dados para exportar."); return; }
+
+    const cols = Object.keys(rows[0]);
+    const lines = [cols.join(","), ...rows.map(r =>
+      cols.map(c => {
+        const v = r[c] == null ? "" : String(r[c]).replace(/"/g, '""');
+        return '"' + v + '"';
+      }).join(",")
+    )];
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "mvp_leads_" + new Date().toISOString().slice(0,10) + ".csv";
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  } catch (err) {
+    showStatus("Erro ao exportar: " + err.message);
+  }
+}
+</script>
+</body>
+</html>

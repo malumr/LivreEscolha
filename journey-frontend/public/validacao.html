@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Livre Escolha – Próximo Destino</title>
+<meta name="description" content="Ajude jovens a descobrirem sua carreira ideal com autoconhecimento e um plano de ação real.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Nunito:wght@700;800;900&display=swap">
+<style>
+:root{
+  --p:#5b5fc7;--p2:#4f46e5;--sec:#7c3aed;--acc:#f59e0b;
+  --bg:#f8f7ff;--bg2:#eef0ff;--surf:#fff;--sur2:#f3f4ff;
+  --bdr:#dde0f7;--fg:#1e1b4b;--fg2:#4a4880;--fg3:#7675a0;
+  --ok:#059669;--ok-bg:#ecfdf5;--err:#dc2626;
+  --r:14px;--font-d:'Nunito',sans-serif;--font-b:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-b);background:var(--bg);color:var(--fg);font-size:16px;line-height:1.65;overflow-x:hidden}
+img{max-width:100%}
+a{color:var(--p);text-decoration:none}
+.container{max-width:900px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left,0px))}
+
+/* NAV */
+nav{background:var(--surf);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:200;padding:14px 0}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--font-d);font-weight:900;font-size:1.2rem;color:var(--p)}
+.logo span{color:var(--sec)}
+.nav-cta{background:var(--p);color:#fff;padding:8px 18px;border-radius:99px;font-size:.85rem;font-weight:600;transition:background .15s}
+.nav-cta:hover{background:var(--p2)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 55%,#7c3aed 100%);padding:72px 0 64px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:5px 14px;font-size:.75rem;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#c7c5ff;margin-bottom:22px}
+.hero h1{font-family:var(--font-d);font-weight:900;font-size:clamp(2rem,5vw,3.2rem);line-height:1.15;color:#fff;text-wrap:balance;margin-bottom:18px}
+.hero h1 em{font-style:normal;color:#fbbf24}
+.hero p{font-size:1.05rem;color:#c7c5ff;max-width:520px;margin:0 auto 32px;text-wrap:balance}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:#fbbf24;color:#1e1b4b;padding:14px 28px;border-radius:12px;font-weight:800;font-size:1rem;border:none;cursor:pointer;transition:transform .12s,background .15s;font-family:var(--font-b)}
+.btn-primary:hover{transform:translateY(-2px);background:#f59e0b}
+.btn-ghost{background:rgba(255,255,255,.12);color:#fff;padding:14px 24px;border-radius:12px;font-weight:600;font-size:.95rem;border:1px solid rgba(255,255,255,.25);cursor:pointer;font-family:var(--font-b);transition:background .15s}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+.stat-row{display:flex;justify-content:center;gap:32px;margin-top:48px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat strong{display:block;font-family:var(--font-d);font-weight:900;font-size:2rem;color:#fbbf24}
+.stat span{font-size:.82rem;color:#c7c5ff}
+
+/* SECTION SHARED */
+.section{padding:72px 0}
+.section-label{font-size:.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--fg3);margin-bottom:10px}
+.section-title{font-family:var(--font-d);font-weight:900;font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.2;text-wrap:balance;margin-bottom:14px}
+.section-title em{font-style:normal;color:var(--p)}
+.section-desc{font-size:1rem;color:var(--fg2);max-width:580px;line-height:1.7}
+
+/* PROBLEM */
+.problem{background:var(--sur2)}
+.prob-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:36px}
+.prob-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;border-top:3px solid var(--err)}
+.prob-card .prob-icon{font-size:1.8rem;margin-bottom:12px}
+.prob-card h3{font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:6px}
+.prob-card p{font-size:.88rem;color:var(--fg2);line-height:1.6}
+
+/* HOW IT WORKS */
+.steps{display:flex;flex-direction:column;gap:0;margin-top:36px;position:relative}
+.step{display:flex;gap:20px;align-items:flex-start;padding-bottom:32px;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;left:19px;top:44px;width:2px;height:calc(100% - 44px);background:var(--bdr)}
+.step-num{width:40px;height:40px;border-radius:50%;background:var(--p);color:#fff;font-family:var(--font-d);font-weight:900;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1}
+.step-body h3{font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:4px;padding-top:8px}
+.step-body p{font-size:.88rem;color:var(--fg2);line-height:1.6}
+.step-tag{display:inline-block;background:var(--bg2);color:var(--p);border-radius:99px;padding:2px 10px;font-size:.72rem;font-weight:700;margin-top:4px}
+
+/* DEMO */
+.demo-section{background:linear-gradient(135deg,var(--bg2) 0%,#f3f0ff 100%)}
+.demo-card{background:var(--surf);border:1.5px solid var(--bdr);border-radius:20px;max-width:600px;margin:32px auto 0;padding:32px 28px;box-shadow:0 4px 24px rgba(91,95,199,.12)}
+.demo-progress{height:6px;background:var(--bg2);border-radius:99px;margin-bottom:24px}
+.demo-progress-fill{height:100%;border-radius:99px;background:var(--p);transition:width .4s}
+.demo-q-label{font-size:.75rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--fg3);margin-bottom:10px}
+.demo-q{font-size:1.1rem;font-weight:600;color:var(--fg);margin-bottom:20px;line-height:1.45}
+.demo-opts{display:flex;flex-direction:column;gap:10px}
+.demo-opt{background:var(--bg);border:1.5px solid var(--bdr);border-radius:10px;padding:12px 16px;cursor:pointer;font-size:.95rem;color:var(--fg2);transition:border-color .15s,background .15s;text-align:left;font-family:var(--font-b)}
+.demo-opt:hover{border-color:var(--p);background:var(--bg2)}
+.demo-opt.sel{border-color:var(--p);background:var(--bg2);color:var(--p);font-weight:600}
+.demo-next{width:100%;margin-top:20px;background:var(--p);color:#fff;border:none;border-radius:10px;padding:13px;font-family:var(--font-b);font-weight:700;font-size:.95rem;cursor:pointer;transition:background .15s;display:none}
+.demo-next:hover{background:var(--p2)}
+.demo-result{display:none;text-align:center}
+.demo-result-title{font-family:var(--font-d);font-weight:900;font-size:1.3rem;color:var(--fg);margin-bottom:6px}
+.demo-result p{font-size:.9rem;color:var(--fg2);margin-bottom:20px}
+.career-preview{background:var(--bg2);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left}
+.career-preview-title{font-weight:700;color:var(--fg);margin-bottom:4px}
+.career-preview-desc{font-size:.85rem;color:var(--fg2)}
+.compat-bar-wrap{display:flex;align-items:center;gap:10px;margin-top:8px}
+.compat-bar{flex:1;height:8px;background:var(--bdr);border-radius:99px;overflow:hidden}
+.compat-fill{height:100%;border-radius:99px;background:var(--p)}
+.compat-pct{font-size:.8rem;font-weight:700;color:var(--p)}
+.demo-disclaimer{font-size:.75rem;color:var(--fg3);font-style:italic;margin-top:12px}
+
+/* TESTIMONIALS */
+.test-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:32px}
+.test-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:20px 22px}
+.test-quote{font-size:.92rem;color:var(--fg2);font-style:italic;line-height:1.65;margin-bottom:14px}
+.test-quote::before{content:"\201C";font-size:1.8rem;line-height:0;vertical-align:-.3em;color:var(--p);margin-right:2px}
+.test-author{display:flex;align-items:center;gap:10px}
+.test-av{width:34px;height:34px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:var(--p);flex-shrink:0}
+.test-info strong{font-size:.88rem;color:var(--fg);display:block}
+.test-info span{font-size:.75rem;color:var(--fg3)}
+
+/* PRICING */
+.pricing-section{background:var(--sur2)}
+.pricing-wrap{max-width:460px;margin:0 auto}
+.price-card{background:var(--surf);border:2px solid var(--p);border-radius:20px;padding:36px 32px;text-align:center;position:relative;box-shadow:0 8px 40px rgba(91,95,199,.18);margin-top:32px}
+.price-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--acc);color:#1e1b4b;padding:4px 18px;border-radius:99px;font-size:.78rem;font-weight:800;white-space:nowrap}
+.price-label{font-size:.8rem;color:var(--fg3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}
+.price-amount{font-family:var(--font-d);font-weight:900;font-size:3.5rem;color:var(--p);line-height:1}
+.price-period{font-size:.85rem;color:var(--fg3);margin-bottom:24px}
+.price-features{list-style:none;text-align:left;margin:0 auto 28px;max-width:280px;display:flex;flex-direction:column;gap:10px}
+.price-features li{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--fg2)}
+.price-features li::before{content:"✓";color:var(--ok);font-weight:800;flex-shrink:0}
+.price-cta{width:100%;background:var(--p);color:#fff;border:none;border-radius:12px;padding:15px;font-family:var(--font-b);font-weight:800;font-size:1.05rem;cursor:pointer;transition:background .15s,transform .1s}
+.price-cta:hover{background:var(--p2);transform:translateY(-1px)}
+.price-note{font-size:.78rem;color:var(--fg3);margin-top:12px}
+
+/* SURVEY */
+.survey-section{background:white}
+.type-selector{display:flex;gap:10px;margin:24px 0;flex-wrap:wrap}
+.type-btn{flex:1;min-width:140px;padding:13px;border:2px solid var(--bdr);border-radius:10px;background:var(--bg);font-family:var(--font-b);font-size:.9rem;font-weight:600;color:var(--fg2);cursor:pointer;transition:all .15s;text-align:center}
+.type-btn.active{border-color:var(--p);background:var(--bg2);color:var(--p)}
+.survey-form{display:none}
+.survey-form.show{display:block}
+.survey-q{margin-bottom:24px}
+.survey-q label{font-weight:600;font-size:.9rem;color:var(--fg);display:block;margin-bottom:10px}
+.scale-row{display:flex;gap:8px;flex-wrap:wrap}
+.scale-btn{width:44px;height:44px;border:1.5px solid var(--bdr);border-radius:8px;background:var(--bg);font-family:var(--font-b);font-size:.88rem;font-weight:600;color:var(--fg3);cursor:pointer;transition:all .12s}
+.scale-btn.sel{border-color:var(--p);background:var(--p);color:#fff}
+.scale-labels{display:flex;justify-content:space-between;font-size:.72rem;color:var(--fg3);margin-top:4px}
+.radio-row{display:flex;gap:10px;flex-wrap:wrap}
+.radio-opt{flex:1;min-width:90px;padding:10px;border:1.5px solid var(--bdr);border-radius:10px;background:var(--bg);text-align:center;font-size:.88rem;font-weight:600;color:var(--fg2);cursor:pointer;transition:all .12s}
+.radio-opt.sel{border-color:var(--p);background:var(--bg2);color:var(--p)}
+textarea.survey-txt{width:100%;border:1.5px solid var(--bdr);border-radius:10px;padding:12px;font-family:var(--font-b);font-size:.9rem;color:var(--fg);background:var(--bg);resize:vertical;min-height:70px;outline:none;transition:border-color .15s}
+textarea.survey-txt:focus{border-color:var(--p)}
+.toggle-row{display:flex;align-items:center;gap:12px}
+.toggle-sw{width:48px;height:28px;background:var(--bdr);border-radius:99px;position:relative;cursor:pointer;transition:background .15s;flex-shrink:0;border:none}
+.toggle-sw.on{background:var(--p)}
+.toggle-sw::after{content:"";width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .15s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle-sw.on::after{left:23px}
+.toggle-label{font-size:.88rem;color:var(--fg2)}
+
+/* LEAD FORM */
+.lead-section{background:var(--bg2)}
+.intent-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:20px 0 28px}
+.intent-card{border:2px solid var(--bdr);border-radius:var(--r);padding:18px 16px;cursor:pointer;transition:all .15s;background:var(--surf)}
+.intent-card.sel{border-color:var(--p);background:#ede9ff}
+.intent-card .ic-icon{font-size:1.5rem;margin-bottom:8px}
+.intent-card .ic-title{font-weight:700;font-size:.9rem;color:var(--fg)}
+.intent-card .ic-desc{font-size:.8rem;color:var(--fg2);margin-top:3px}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.form-group label{font-size:.82rem;font-weight:600;color:var(--fg2)}
+.form-group input{background:var(--bg);border:1.5px solid var(--bdr);border-radius:10px;padding:12px 14px;font-family:var(--font-b);font-size:.95rem;color:var(--fg);outline:none;transition:border-color .15s}
+.form-group input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(91,95,199,.12)}
+.form-group input.err{border-color:var(--err)}
+.lgpd-row{display:flex;gap:10px;align-items:flex-start;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin:20px 0}
+.lgpd-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--p);margin-top:2px;flex-shrink:0;cursor:pointer}
+.lgpd-row label{font-size:.8rem;color:var(--fg2);line-height:1.5}
+.hp{position:absolute;left:-9999px;opacity:0;pointer-events:none}
+.submit-btn{width:100%;background:var(--p);color:#fff;border:none;border-radius:12px;padding:15px;font-family:var(--font-b);font-weight:800;font-size:1.05rem;cursor:pointer;transition:background .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.submit-btn:hover:not(:disabled){background:var(--p2);transform:translateY(-1px)}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.submit-btn.loading .spinner{display:block}
+.submit-btn.loading .btn-text{display:none}
+.field-error{font-size:.78rem;color:var(--err);display:none}
+.field-error.show{display:block}
+
+/* SUCCESS */
+.success-box{display:none;text-align:center;padding:20px 0}
+.success-box.show{display:block}
+.success-icon{font-size:3.5rem;display:block;margin-bottom:16px}
+.success-box h2{font-family:var(--font-d);font-weight:900;font-size:1.5rem;color:var(--fg);margin-bottom:8px}
+.success-box p{font-size:.95rem;color:var(--fg2);line-height:1.6}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:10px;margin-top:28px}
+.faq-item{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
+.faq-q{padding:16px 20px;font-weight:600;font-size:.95rem;color:var(--fg);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faq-q .arrow{transition:transform .2s;font-size:.8rem;color:var(--fg3)}
+.faq-item.open .faq-q .arrow{transform:rotate(90deg)}
+.faq-a{display:none;padding:0 20px 16px;font-size:.9rem;color:var(--fg2);line-height:1.6}
+.faq-item.open .faq-a{display:block}
+
+/* FOOTER */
+footer{background:#1e1b4b;padding:40px 0;text-align:center}
+footer .logo-f{font-family:var(--font-d);font-weight:900;font-size:1.3rem;color:#fff;margin-bottom:8px}
+footer .logo-f span{color:#fbbf24}
+footer p{font-size:.82rem;color:#7675a0;margin-top:8px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1e1b4b;color:#fff;padding:12px 20px;border-radius:10px;font-size:.88rem;font-weight:600;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateY(0)}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:560px){
+  .hero{padding:52px 0 48px}
+  .stat-row{gap:20px}
+  .section{padding:52px 0}
+  .demo-card{padding:22px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container nav-inner">
+    <div class="logo">Livre<span>Escolha</span></div>
+    <a href="https://livreescolha.vercel.app" class="nav-cta" id="nav-cta">Acessar plataforma</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="sec-hero" data-section="hero">
+  <div class="container">
+    <div class="hero-tag">🧭 Programa Próximo Destino</div>
+    <h1>Ajude o jovem a descobrir<br>sua <em>carreira ideal</em></h1>
+    <p>Uma jornada de autoconhecimento que transforma dúvida em decisão — com plano de ação real.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="scrollTo('#survey-section')" id="btn-hero-cta">Quero conhecer agora</button>
+      <button class="btn-ghost" onclick="scrollTo('#demo-section')" id="btn-hero-demo">Ver como funciona</button>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><strong>51%</strong><span>dos universitários se arrependem do curso</span></div>
+      <div class="stat"><strong>4</strong><span>módulos de jornada personalizada</span></div>
+      <div class="stat"><strong>R$&nbsp;19</strong><span>acesso completo à plataforma</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMA -->
+<section class="section problem" id="sec-problem" data-section="problem">
+  <div class="container">
+    <div class="section-label">O problema</div>
+    <h2 class="section-title">Jovens chegam à escolha<br><em>sem o suporte que precisam</em></h2>
+    <p class="section-desc">No Brasil, 51% dos universitários se arrependem do curso escolhido (FGV, 2022). Essa decisão é tomada sob pressão, sem autoconhecimento e sem informação de qualidade.</p>
+    <div class="prob-grid">
+      <div class="prob-card"><div class="prob-icon">🎲</div><h3>Escolha ao acaso</h3><p>A maioria decide por influência da família ou de amigos, sem entender seus próprios valores e talentos.</p></div>
+      <div class="prob-card"><div class="prob-icon">🌫️</div><h3>Sem autoconhecimento</h3><p>Jovens não têm espaço estruturado para refletir sobre quem são e o que realmente os motiva.</p></div>
+      <div class="prob-card"><div class="prob-icon">🗺️</div><h3>Sem plano de ação</h3><p>Mesmo quem descobre sua área não sabe os próximos passos concretos para chegar lá.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUÇÃO -->
+<section class="section" id="sec-solution" data-section="solution">
+  <div class="container">
+    <div class="section-label">A solução</div>
+    <h2 class="section-title">Uma jornada de descoberta,<br><em>não um teste vocacional</em></h2>
+    <p class="section-desc">O Programa Próximo Destino guia cada jovem por módulos progressivos que desenvolvem autoconhecimento, exploração de carreiras e um plano de ação personalizado — tudo digital, mobile-first e seguro.</p>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="section" id="sec-how" data-section="how-it-works" style="background:var(--sur2);padding-top:0">
+  <div class="container">
+    <div class="section-label" style="padding-top:72px">Como funciona</div>
+    <h2 class="section-title">4 módulos. Uma transformação.</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Mapa Interior</h3><p>Perguntas curtas e reflexivas que revelam preferências, valores e estilo de trabalho do jovem.</p><span class="step-tag">Autoconhecimento</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Horizonte Ampliado</h3><p>Exploração de mais de 100 carreiras com informações detalhadas: mercado, renda, habilidades e desafios.</p><span class="step-tag">Exploração profissional</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Rota Definida</h3><p>O sistema apresenta as carreiras com maior compatibilidade, com justificativa personalizada para a escolha.</p><span class="step-tag">Decisão fundamentada</span></div></div>
+      <div class="step" style="padding-bottom:0"><div class="step-num">4</div><div class="step-body"><h3>Plano de Voo</h3><p>Um plano de ação com 6 passos concretos e personalizados — do ensino médio à entrada no mercado.</p><span class="step-tag">Próximos passos</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO INTERATIVA -->
+<section class="section demo-section" id="demo-section" data-section="demo">
+  <div class="container" style="text-align:center">
+    <div class="section-label">Demonstração</div>
+    <h2 class="section-title">Experimente 3 perguntas da jornada</h2>
+    <p class="section-desc" style="margin:0 auto 0">Veja como funciona o Mapa Interior. <strong>Isso é uma amostra ilustrativa</strong> — não representa um diagnóstico real.</p>
+    <div class="demo-card">
+      <div class="demo-progress"><div class="demo-progress-fill" id="demo-pb" style="width:0%"></div></div>
+      <!-- Q1 -->
+      <div id="dq1">
+        <div class="demo-q-label">Pergunta 1 de 3</div>
+        <div class="demo-q">Você prefere trabalhar:</div>
+        <div class="demo-opts">
+          <button class="demo-opt" data-q="1" data-v="sozinho">Sozinho</button>
+          <button class="demo-opt" data-q="1" data-v="equipe">Em equipe</button>
+          <button class="demo-opt" data-q="1" data-v="depende">Depende da situação</button>
+        </div>
+        <button class="demo-next" id="dn1" onclick="demoNext(2)">Próxima pergunta →</button>
+      </div>
+      <!-- Q2 -->
+      <div id="dq2" style="display:none">
+        <div class="demo-q-label">Pergunta 2 de 3</div>
+        <div class="demo-q">Quando enfrenta um problema, você prefere:</div>
+        <div class="demo-opts">
+          <button class="demo-opt" data-q="2" data-v="pratico">Buscar soluções práticas</button>
+          <button class="demo-opt" data-q="2" data-v="analitico">Analisar profundamente</button>
+          <button class="demo-opt" data-q="2" data-v="colaborativo">Pedir ajuda e colaborar</button>
+        </div>
+        <button class="demo-next" id="dn2" onclick="demoNext(3)">Próxima pergunta →</button>
+      </div>
+      <!-- Q3 -->
+      <div id="dq3" style="display:none">
+        <div class="demo-q-label">Pergunta 3 de 3</div>
+        <div class="demo-q">O que mais te motiva no trabalho?</div>
+        <div class="demo-opts">
+          <button class="demo-opt" data-q="3" data-v="criar">Criar algo novo</button>
+          <button class="demo-opt" data-q="3" data-v="ajudar">Ajudar pessoas</button>
+          <button class="demo-opt" data-q="3" data-v="desafios">Resolver desafios complexos</button>
+        </div>
+        <button class="demo-next" id="dn3" onclick="demoResult()">Ver meu resultado →</button>
+      </div>
+      <!-- Resultado -->
+      <div class="demo-result" id="demo-result">
+        <div class="demo-result-title">🎯 Sua compatibilidade (amostra)</div>
+        <p>Com base nas suas 3 respostas, o sistema identificaria estas afinidades:</p>
+        <div id="career-cards-demo"></div>
+        <div class="demo-disclaimer">⚠ Demonstração ilustrativa. O diagnóstico real usa 20+ perguntas e uma jornada completa.</div>
+        <button class="btn-primary" style="margin-top:20px;width:100%" onclick="scrollTo('#survey-section')" id="btn-demo-interest">Quero acesso completo →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="section" id="sec-test" data-section="testimonials" style="background:var(--sur2)">
+  <div class="container">
+    <div class="section-label">Quem já usou</div>
+    <h2 class="section-title">Resultados reais de quem <em>testou a jornada</em></h2>
+    <div class="test-grid">
+      <div class="test-card"><div class="test-quote">Estava completamente perdida entre medicina e design. Depois da jornada, ficou claro que me importo muito mais com criar. Entrei em Design no semestre seguinte.</div><div class="test-author"><div class="test-av">A</div><div class="test-info"><strong>Ana L., 17 anos</strong><span>São Paulo, SP</span></div></div></div>
+      <div class="test-card"><div class="test-quote">O Próximo Destino me ajudou a mostrar pra minha mãe (com dados!) por que engenharia faz mais sentido pra mim. Agora ela apoia.</div><div class="test-author"><div class="test-av">G</div><div class="test-info"><strong>Gabriel M., 16 anos</strong><span>Belo Horizonte, MG</span></div></div></div>
+      <div class="test-card"><div class="test-quote">Achei que ia ser mais um teste chato de vocação. Mas as perguntas me fizeram pensar de verdade. Agora tenho um plano de ação pra este semestre.</div><div class="test-author"><div class="test-av">L</div><div class="test-info"><strong>Larissa K., 18 anos</strong><span>Curitiba, PR</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PREÇO -->
+<section class="section pricing-section" id="sec-pricing" data-section="pricing">
+  <div class="container" style="text-align:center">
+    <div class="section-label">Oferta de lançamento</div>
+    <h2 class="section-title">Acesso completo à jornada</h2>
+    <div class="pricing-wrap">
+      <div class="price-card">
+        <div class="price-badge">🏷 Lançamento — Oferta especial</div>
+        <div class="price-label">Acesso completo — Próximo Destino</div>
+        <div class="price-amount">R$&nbsp;19</div>
+        <div class="price-period">pagamento único · acesso por 6 meses</div>
+        <ul class="price-features">
+          <li>Mapa Interior — autoconhecimento</li>
+          <li>Horizonte Ampliado — 100+ carreiras</li>
+          <li>Rota Definida — sugestão personalizada</li>
+          <li>Plano de Voo — 6 passos concretos</li>
+          <li>Dashboard com seu progresso</li>
+          <li>Dados protegidos (LGPD)</li>
+        </ul>
+        <button class="price-cta" onclick="scrollTo('#lead-section')" id="btn-price-cta">Quero meu acesso →</button>
+        <div class="price-note">Sem cobrança agora — estamos validando o interesse antes do lançamento.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PESQUISA DE ACEITAÇÃO -->
+<section class="section survey-section" id="survey-section" data-section="survey">
+  <div class="container">
+    <div class="section-label">Pesquisa rápida</div>
+    <h2 class="section-title">Sua opinião <em>vai moldar</em> o produto</h2>
+    <p class="section-desc">Responda 7 perguntas rápidas e nos ajude a entender se a Livre Escolha resolve um problema real para você.</p>
+
+    <p style="font-weight:600;margin-top:24px;margin-bottom:8px;font-size:.9rem">Você é:</p>
+    <div class="type-selector">
+      <button class="type-btn" id="tb-jovem" onclick="selectType('jovem')">🧑‍🎓 Jovem / Estudante</button>
+      <button class="type-btn" id="tb-responsavel" onclick="selectType('responsavel')">👨‍👩‍👧 Responsável / Educador</button>
+    </div>
+
+    <div class="survey-form" id="sf-jovem">
+      <div class="survey-q">
+        <label>1. Você considera importante desenvolver o autoconhecimento antes de escolher uma profissão?</label>
+        <div class="scale-row" id="sq1"></div>
+        <div class="scale-labels"><span>Discordo</span><span>Concordo totalmente</span></div>
+      </div>
+      <div class="survey-q">
+        <label>2. Você acredita que uma plataforma como a Livre Escolha poderia ajudar nessa decisão?</label>
+        <div class="scale-row" id="sq2"></div>
+        <div class="scale-labels"><span>Não acredito</span><span>Acredito muito</span></div>
+      </div>
+      <div class="survey-q">
+        <label>3. Qual parte da proposta mais chamou sua atenção? (opcional)</label>
+        <textarea class="survey-txt" id="sq3" placeholder="Ex: o plano de ação, as perguntas do mapa interior..."></textarea>
+      </div>
+      <div class="survey-q">
+        <label>4. Você teria interesse em utilizar a Livre Escolha?</label>
+        <div class="radio-row">
+          <button class="radio-opt" data-q="q4" data-v="sim" onclick="selectRadio(this,'q4')">Sim, tenho interesse</button>
+          <button class="radio-opt" data-q="q4" data-v="talvez" onclick="selectRadio(this,'q4')">Talvez</button>
+          <button class="radio-opt" data-q="q4" data-v="nao" onclick="selectRadio(this,'q4')">Não</button>
+        </div>
+      </div>
+      <div class="survey-q">
+        <label>5. Considerando o valor de R$ 19,00, você pagaria pelo acesso?</label>
+        <div class="radio-row">
+          <button class="radio-opt" data-q="q5" data-v="sim" onclick="selectRadio(this,'q5')">Sim, pagaria</button>
+          <button class="radio-opt" data-q="q5" data-v="talvez" onclick="selectRadio(this,'q5')">Talvez</button>
+          <button class="radio-opt" data-q="q5" data-v="nao" onclick="selectRadio(this,'q5')">Não pagaria</button>
+        </div>
+      </div>
+      <div class="survey-q">
+        <label>6. O que faria você desistir de adquirir o produto? (opcional)</label>
+        <textarea class="survey-txt" id="sq6" placeholder="Ex: falta de confiança, preço, não ter celular..."></textarea>
+      </div>
+      <div class="survey-q">
+        <label>7. Você gostaria de receber mais informações sobre a Livre Escolha?</label>
+        <div class="toggle-row">
+          <button class="toggle-sw" id="sq7-toggle" onclick="toggleQ7()"></button>
+          <span class="toggle-label" id="sq7-label">Não</span>
+        </div>
+      </div>
+      <button class="btn-primary" style="margin-top:8px" onclick="scrollTo('#lead-section');trackEvent('button_click','survey_to_form')" id="btn-survey-next">Continuar para inscrição →</button>
+    </div>
+
+    <!-- Same survey for responsaveis (can be extended; same structure for now) -->
+    <div class="survey-form" id="sf-responsavel">
+      <div class="survey-q">
+        <label>1. Você considera importante que jovens desenvolvam autoconhecimento antes de escolher uma profissão?</label>
+        <div class="scale-row" id="rq1"></div>
+        <div class="scale-labels"><span>Discordo</span><span>Concordo totalmente</span></div>
+      </div>
+      <div class="survey-q">
+        <label>2. Você acredita que uma plataforma digital poderia ajudar o jovem nessa decisão?</label>
+        <div class="scale-row" id="rq2"></div>
+        <div class="scale-labels"><span>Não acredito</span><span>Acredito muito</span></div>
+      </div>
+      <div class="survey-q">
+        <label>3. O que mais chamou sua atenção na proposta? (opcional)</label>
+        <textarea class="survey-txt" id="rq3" placeholder="Ex: o plano de ação, a segurança dos dados, o preço..."></textarea>
+      </div>
+      <div class="survey-q">
+        <label>4. Você teria interesse em adquirir para o(a) jovem sob seus cuidados?</label>
+        <div class="radio-row">
+          <button class="radio-opt" data-q="rq4" data-v="sim" onclick="selectRadio(this,'rq4')">Sim, tenho interesse</button>
+          <button class="radio-opt" data-q="rq4" data-v="talvez" onclick="selectRadio(this,'rq4')">Talvez</button>
+          <button class="radio-opt" data-q="rq4" data-v="nao" onclick="selectRadio(this,'rq4')">Não</button>
+        </div>
+      </div>
+      <div class="survey-q">
+        <label>5. Considerando R$ 19,00 de acesso completo, você pagaria?</label>
+        <div class="radio-row">
+          <button class="radio-opt" data-q="rq5" data-v="sim" onclick="selectRadio(this,'rq5')">Sim, pagaria</button>
+          <button class="radio-opt" data-q="rq5" data-v="talvez" onclick="selectRadio(this,'rq5')">Talvez</button>
+          <button class="radio-opt" data-q="rq5" data-v="nao" onclick="selectRadio(this,'rq5')">Não pagaria</button>
+        </div>
+      </div>
+      <div class="survey-q">
+        <label>6. O que faria você desistir de adquirir? (opcional)</label>
+        <textarea class="survey-txt" id="rq6" placeholder="Ex: segurança dos dados, não ter evidências de resultado..."></textarea>
+      </div>
+      <div class="survey-q">
+        <label>7. Você gostaria de receber mais informações sobre o Programa Próximo Destino?</label>
+        <div class="toggle-row">
+          <button class="toggle-sw" id="rq7-toggle" onclick="toggleQ7('r')"></button>
+          <span class="toggle-label" id="rq7-label">Não</span>
+        </div>
+      </div>
+      <button class="btn-primary" style="margin-top:8px" onclick="scrollTo('#lead-section');trackEvent('button_click','survey_to_form')" id="btn-rsurvey-next">Continuar para inscrição →</button>
+    </div>
+  </div>
+</section>
+
+<!-- CAPTAÇÃO DE INTERESSE / INTENÇÃO -->
+<section class="section lead-section" id="lead-section" data-section="lead-form">
+  <div class="container">
+    <div class="section-label">Manifeste seu interesse</div>
+    <h2 class="section-title">Reserve sua vaga no <em>lançamento</em></h2>
+    <p class="section-desc">Escolha como quer participar. Nenhum pagamento agora — apenas registre sua intenção.</p>
+
+    <div class="intent-cards">
+      <div class="intent-card" id="ic-interesse" onclick="selectIntent('interesse')">
+        <div class="ic-icon">👀</div>
+        <div class="ic-title">Quero conhecer melhor</div>
+        <div class="ic-desc">Me envie mais informações sobre o produto</div>
+      </div>
+      <div class="intent-card" id="ic-intencao_compra" onclick="selectIntent('intencao_compra')">
+        <div class="ic-icon">🎯</div>
+        <div class="ic-title">Tenho intenção de adquirir</div>
+        <div class="ic-desc">Avise-me quando o acesso abrir por R$ 19,00</div>
+      </div>
+    </div>
+
+    <div id="lead-form-wrap">
+      <form id="lead-form" novalidate>
+        <div class="hp" aria-hidden="true"><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></div>
+        <div class="form-group">
+          <label for="f-nome">Seu nome *</label>
+          <input type="text" id="f-nome" placeholder="Ex: Ana Lima" autocomplete="name">
+          <span class="field-error" id="e-nome">Por favor, informe seu nome.</span>
+        </div>
+        <div class="form-group">
+          <label for="f-email">E-mail *</label>
+          <input type="email" id="f-email" placeholder="seu@email.com" autocomplete="email">
+          <span class="field-error" id="e-email">Informe um e-mail válido.</span>
+        </div>
+        <div class="form-group">
+          <label for="f-wpp">WhatsApp (opcional)</label>
+          <input type="tel" id="f-wpp" placeholder="+55 (11) 99999-9999" autocomplete="tel">
+        </div>
+        <div class="lgpd-row">
+          <input type="checkbox" id="f-lgpd">
+          <label for="f-lgpd">Concordo que a <strong>Livre Escolha</strong> armazene meus dados de contato para receber informações sobre o produto. Posso cancelar respondendo qualquer e-mail. Conforme a <strong>LGPD (Lei 13.709/2018)</strong>.</label>
+        </div>
+        <span class="field-error" id="e-lgpd" style="margin-bottom:12px;display:none">Aceite os termos para continuar.</span>
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <span class="btn-text">Registrar meu interesse →</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+      <div class="success-box" id="success-box">
+        <span class="success-icon">🎉</span>
+        <h2>Interesse registrado!</h2>
+        <p>Obrigado, <strong id="success-name"></strong>! Você receberá um e-mail de confirmação em breve. A equipe da Livre Escolha entrará em contato quando o acesso abrir.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="sec-faq" data-section="faq" style="background:var(--sur2)">
+  <div class="container">
+    <div class="section-label">Dúvidas frequentes</div>
+    <h2 class="section-title">Perguntas e respostas</h2>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">O R$ 19,00 é cobrado agora? <span class="arrow">▶</span></div><div class="faq-a">Não. Estamos em fase de validação do interesse. Nenhum pagamento é cobrado agora. Ao registrar seu interesse, você apenas manifesta intenção — e será avisado quando o acesso abrir.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Posso usar em qualquer celular? <span class="arrow">▶</span></div><div class="faq-a">Sim. A plataforma foi desenvolvida com foco em mobile. Funciona em qualquer celular com navegador (Chrome, Safari, etc.) — sem precisar baixar nenhum aplicativo.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Os dados do jovem ficam seguros? <span class="arrow">▶</span></div><div class="faq-a">Absolutamente. A Livre Escolha está em conformidade com a LGPD. As respostas ficam protegidas em banco de dados seguro, com acesso restrito. Nenhum dado é compartilhado com terceiros.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Quanto tempo leva para completar a jornada? <span class="arrow">▶</span></div><div class="faq-a">A jornada completa pode ser feita em 2 a 3 horas, divididas em sessões. Cada módulo dura entre 20 e 40 minutos. O progresso fica salvo, então o jovem pode pausar e continuar quando quiser.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="logo-f">Livre<span>Escolha</span></div>
+    <p>Programa Próximo Destino · São Caetano do Sul, SP</p>
+    <p style="margin-top:4px">Dados protegidos pela LGPD · © 2026</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const API = "https://livreescolha.onrender.com";
+
+// ── SESSION & UTM ────────────────────────────────────────────────
+let SESSION_ID = "";
+try { SESSION_ID = sessionStorage.getItem("mvp_sid") || ""; } catch{}
+if (!SESSION_ID) {
+  SESSION_ID = "mvp-" + Date.now() + "-" + Math.random().toString(36).slice(2,9);
+  try { sessionStorage.setItem("mvp_sid", SESSION_ID); } catch{}
+}
+
+function getUtm() {
+  const p = new URLSearchParams(location.search);
+  return { utm_source: p.get("utm_source")||"", utm_medium: p.get("utm_medium")||"", utm_campaign: p.get("utm_campaign")||"", utm_content: p.get("utm_content")||"" };
+}
+const UTM = getUtm();
+
+function getDevice() {
+  const w = window.innerWidth;
+  if (w <= 480) return "mobile";
+  if (w <= 1024) return "tablet";
+  return "desktop";
+}
+
+// ── TRACKING ─────────────────────────────────────────────────────
+async function trackEvent(type, name, data = {}) {
+  try {
+    await fetch(API + "/mvp/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: SESSION_ID, event_type: type, event_name: name, data, ...UTM }),
+    });
+  } catch {}
+}
+
+// Section visibility
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) trackEvent("section_view", e.target.dataset.section || e.target.id);
+  });
+}, { threshold: 0.3 });
+document.querySelectorAll("[data-section]").forEach(el => observer.observe(el));
+
+// Button click tracking
+document.querySelectorAll("[id^=btn-]").forEach(btn => {
+  btn.addEventListener("click", () => trackEvent("button_click", btn.id));
+});
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function scrollTo(sel) {
+  document.querySelector(sel)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+function toggleFaq(el) { el.closest(".faq-item").classList.toggle("open"); }
+
+// ── DEMO ──────────────────────────────────────────────────────────
+const demoAnswers = {};
+let demoStarted = false;
+
+document.querySelectorAll(".demo-opt").forEach(btn => {
+  btn.addEventListener("click", function() {
+    const q = this.dataset.q;
+    document.querySelectorAll(`.demo-opt[data-q="${q}"]`).forEach(b => b.classList.remove("sel"));
+    this.classList.add("sel");
+    demoAnswers[q] = this.dataset.v;
+    document.getElementById(`dn${q}`).style.display = "block";
+    if (!demoStarted) { trackEvent("demo_step", "demo_start"); demoStarted = true; }
+    trackEvent("demo_step", `demo_q${q}_answered`, { value: this.dataset.v });
+  });
+});
+
+function demoNext(next) {
+  document.getElementById(`dq${next-1}`).style.display = "none";
+  document.getElementById(`dq${next}`).style.display = "block";
+  document.getElementById("demo-pb").style.width = ((next-1)/3*100) + "%";
+}
+
+const DEMO_CAREERS = {
+  sozinho: { criar: ["Desenvolvedor de Software","Designer Gráfico"], ajudar: ["Psicólogo","Assistente Social"], desafios: ["Pesquisador","Analista de Dados"] },
+  equipe:  { criar: ["Gestor de Negócios","Analista de Marketing"], ajudar: ["Professor","Assistente Social"], desafios: ["Engenheiro","Analista de Projetos"] },
+  depende: { criar: ["Designer Gráfico","Analista de Marketing"], ajudar: ["Psicólogo","Professor"], desafios: ["Engenheiro","Consultor"] },
+};
+
+function demoResult() {
+  document.getElementById("dq3").style.display = "none";
+  document.getElementById("demo-pb").style.width = "100%";
+  const result = document.getElementById("demo-result");
+  result.style.display = "block";
+  trackEvent("demo_step", "demo_result_shown", demoAnswers);
+
+  const pref = demoAnswers["1"] || "depende";
+  const mot  = demoAnswers["3"] || "criar";
+  const careers = (DEMO_CAREERS[pref] || DEMO_CAREERS.depende)[mot] || ["Desenvolvedor de Software","Designer Gráfico"];
+  const scores = [89, 74];
+
+  const container = document.getElementById("career-cards-demo");
+  container.innerHTML = careers.map((c, i) => `
+    <div class="career-preview">
+      <div class="career-preview-title">${c}</div>
+      <div class="compat-bar-wrap">
+        <div class="compat-bar"><div class="compat-fill" style="width:${scores[i]}%"></div></div>
+        <span class="compat-pct">${scores[i]}%</span>
+      </div>
+    </div>`).join("");
+}
+
+// ── SURVEY ────────────────────────────────────────────────────────
+let currentType = null;
+const radioSelections = {};
+const q7State = { s: false, r: false };
+
+function buildScales(prefix, ids) {
+  ids.forEach(id => {
+    const container = document.getElementById(id);
+    if (!container) return;
+    for (let v = 1; v <= 5; v++) {
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.className = "scale-btn"; btn.textContent = v;
+      btn.dataset.v = v; btn.dataset.id = id;
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(`.scale-btn[data-id="${id}"]`).forEach(b => b.classList.remove("sel"));
+        this.classList.add("sel");
+        radioSelections[id] = parseInt(this.dataset.v);
+        trackEvent("survey_answer", id, { value: v });
+      });
+      container.appendChild(btn);
+    }
+  });
+}
+buildScales("s", ["sq1","sq2"]);
+buildScales("r", ["rq1","rq2"]);
+
+function selectRadio(btn, key) {
+  document.querySelectorAll(`.radio-opt[data-q="${key}"]`).forEach(b => b.classList.remove("sel"));
+  btn.classList.add("sel");
+  radioSelections[key] = btn.dataset.v;
+  trackEvent("survey_answer", key, { value: btn.dataset.v });
+}
+
+function toggleQ7(prefix = "") {
+  const key = prefix + "s";
+  q7State[key] = !q7State[key];
+  const id = prefix + "q7";
+  document.getElementById(`${prefix || "s"}q7-toggle`)?.classList.toggle("on", q7State[key]);
+  document.getElementById(`${prefix || "s"}q7-label`).textContent = q7State[key] ? "Sim, quero!" : "Não";
+}
+
+function selectType(type) {
+  currentType = type;
+  document.getElementById("tb-jovem").classList.toggle("active", type === "jovem");
+  document.getElementById("tb-responsavel").classList.toggle("active", type === "responsavel");
+  document.getElementById("sf-jovem").classList.toggle("show", type === "jovem");
+  document.getElementById("sf-responsavel").classList.toggle("show", type === "responsavel");
+  trackEvent("survey_start", "type_selected", { type });
+}
+
+// ── INTENT ────────────────────────────────────────────────────────
+let selectedIntent = "interesse";
+function selectIntent(intent) {
+  selectedIntent = intent;
+  document.getElementById("ic-interesse").classList.toggle("sel", intent === "interesse");
+  document.getElementById("ic-intencao_compra").classList.toggle("sel", intent === "intencao_compra");
+  trackEvent("button_click", "intent_selected", { intent });
+}
+
+// ── LEAD FORM ──────────────────────────────────────────────────────
+document.getElementById("lead-form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  // Honeypot
+  if (document.getElementById("website").value) return;
+
+  // Validation
+  const nome  = document.getElementById("f-nome").value.trim();
+  const email = document.getElementById("f-email").value.trim();
+  const lgpd  = document.getElementById("f-lgpd").checked;
+  let ok = true;
+
+  document.getElementById("f-nome").classList.toggle("err", !nome || nome.length < 2);
+  document.getElementById("e-nome").classList.toggle("show", !nome || nome.length < 2);
+  if (!nome || nome.length < 2) ok = false;
+
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  document.getElementById("f-email").classList.toggle("err", !emailOk);
+  document.getElementById("e-email").classList.toggle("show", !emailOk);
+  if (!emailOk) ok = false;
+
+  document.getElementById("e-lgpd").style.display = lgpd ? "none" : "block";
+  if (!lgpd) ok = false;
+
+  if (!ok) return;
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true; btn.classList.add("loading");
+
+  const prefix = currentType === "responsavel" ? "r" : "";
+  const q7key  = prefix + "s";
+  const data = {
+    session_id: SESSION_ID, nome, email,
+    whatsapp: document.getElementById("f-wpp").value.trim(),
+    respondent_type: currentType || "jovem",
+    q1_autoconhecimento: radioSelections[prefix + "q1"] || radioSelections["sq1"] || null,
+    q2_acredita: radioSelections[prefix + "q2"] || radioSelections["sq2"] || null,
+    q3_atencao: (document.getElementById(prefix + "q3")?.value || document.getElementById("sq3")?.value || "").trim(),
+    q4_interesse: radioSelections[prefix + "q4"] || radioSelections["q4"] || null,
+    q5_pagaria: radioSelections[prefix + "q5"] || radioSelections["q5"] || null,
+    q6_objecao: (document.getElementById(prefix + "q6")?.value || document.getElementById("sq6")?.value || "").trim(),
+    q7_mais_infos: q7State[q7key],
+    intent_level: selectedIntent,
+    device_type: getDevice(),
+    lgpd_consent: true,
+    ...UTM,
+  };
+
+  try {
+    await fetch(API + "/mvp/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  } catch {}
+
+  // Show success
+  document.getElementById("lead-form").style.display = "none";
+  const sb = document.getElementById("success-box");
+  sb.classList.add("show");
+  document.getElementById("success-name").textContent = nome.split(" ")[0];
+  trackEvent("form_submit", "lead_submitted", { intent: selectedIntent });
+  btn.disabled = false; btn.classList.remove("loading");
+});
+
+// ── INIT ───────────────────────────────────────────────────────────
+trackEvent("page_view", "landing_page_loaded", { device: getDevice(), ...UTM });
+</script>
+</body>
+</html>
