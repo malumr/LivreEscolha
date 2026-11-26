@@ -225,8 +225,8 @@ footer p{font-size:.82rem;color:#7675a0;margin-top:8px}
     <h1>Ajude o jovem a descobrir<br>sua <em>carreira ideal</em></h1>
     <p>Uma jornada de autoconhecimento que transforma dúvida em decisão — com plano de ação real.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="scrollTo('#sec-pricing')" id="btn-hero-cta">Quero conhecer agora</button>
-      <button class="btn-ghost" onclick="scrollTo('#demo-section')" id="btn-hero-demo">Ver como funciona</button>
+      <button class="btn-primary" onclick="navTo('#sec-pricing')" id="btn-hero-cta">Quero conhecer agora</button>
+      <button class="btn-ghost" onclick="navTo('#demo-section')" id="btn-hero-demo">Ver como funciona</button>
     </div>
     <div class="stat-row">
       <div class="stat"><strong>51%</strong><span>dos universitários se arrependem do curso</span></div>
@@ -320,7 +320,7 @@ footer p{font-size:.82rem;color:#7675a0;margin-top:8px}
         <p>Com base nas suas 3 respostas, o sistema identificaria estas afinidades:</p>
         <div id="career-cards-demo"></div>
         <div class="demo-disclaimer">⚠ Demonstração ilustrativa. O diagnóstico real usa 20+ perguntas e uma jornada completa.</div>
-        <button class="btn-primary" style="margin-top:20px;width:100%" onclick="scrollTo('#survey-section')" id="btn-demo-interest">Quero acesso completo →</button>
+        <button class="btn-primary" style="margin-top:20px;width:100%" onclick="navTo('#survey-section')" id="btn-demo-interest">Quero acesso completo →</button>
       </div>
     </div>
   </div>
@@ -420,7 +420,7 @@ footer p{font-size:.82rem;color:#7675a0;margin-top:8px}
           <span class="toggle-label" id="sq7-label">Não</span>
         </div>
       </div>
-      <button class="btn-primary" style="margin-top:8px" onclick="scrollTo('#lead-section');trackEvent('button_click','survey_to_form')" id="btn-survey-next">Continuar para inscrição →</button>
+      <button class="btn-primary" style="margin-top:8px" onclick="navTo('#lead-section');trackEvent('button_click','survey_to_form')" id="btn-survey-next">Continuar para inscrição →</button>
     </div>
 
     <!-- Same survey for responsaveis (can be extended; same structure for now) -->
@@ -466,7 +466,7 @@ footer p{font-size:.82rem;color:#7675a0;margin-top:8px}
           <span class="toggle-label" id="rq7-label">Não</span>
         </div>
       </div>
-      <button class="btn-primary" style="margin-top:8px" onclick="scrollTo('#lead-section');trackEvent('button_click','survey_to_form')" id="btn-rsurvey-next">Continuar para inscrição →</button>
+      <button class="btn-primary" style="margin-top:8px" onclick="navTo('#lead-section');trackEvent('button_click','survey_to_form')" id="btn-rsurvey-next">Continuar para inscrição →</button>
     </div>
   </div>
 </section>
@@ -625,7 +625,7 @@ document.querySelectorAll("[id^=btn-]").forEach(btn => {
 });
 
 // ── UTILS ─────────────────────────────────────────────────────────
-function scrollTo(sel) {
+function navTo(sel) {
   document.querySelector(sel)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 function showToast(msg) {
