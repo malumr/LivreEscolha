@@ -154,6 +154,54 @@ class AdminRecommendation(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
+# ─── MVP DE VALIDAÇÃO COMERCIAL ──────────────────────────────────────────────
+
+class MVPLead(Base):
+    """Lead captado na landing page do MVP de validação."""
+    __tablename__ = "mvp_leads"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    session_id      = Column(String(100), nullable=False, index=True)
+    created_at      = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    # Contato
+    nome            = Column(String(150))
+    email           = Column(String(255), index=True)
+    whatsapp        = Column(String(30))
+    respondent_type = Column(String(20))   # 'jovem' | 'responsavel'
+    # Pesquisa de aceitação
+    q1_autoconhecimento = Column(Integer)  # 1-5
+    q2_acredita         = Column(Integer)  # 1-5
+    q3_atencao          = Column(Text)
+    q4_interesse        = Column(String(10))  # 'sim'|'talvez'|'nao'
+    q5_pagaria          = Column(String(10))
+    q6_objecao          = Column(Text)
+    q7_mais_infos       = Column(Boolean)
+    # Intenção declarada
+    intent_level        = Column(String(30))  # 'interesse'|'intencao_compra'
+    # Rastreamento
+    utm_source          = Column(String(100))
+    utm_medium          = Column(String(100))
+    utm_campaign        = Column(String(100))
+    utm_content         = Column(String(100))
+    device_type         = Column(String(20))  # 'mobile'|'desktop'|'tablet'
+    lgpd_consent        = Column(Boolean, default=True)
+
+
+class MVPEvent(Base):
+    """Eventos rastreados na landing page do MVP."""
+    __tablename__ = "mvp_events"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    session_id   = Column(String(100), nullable=False, index=True)
+    created_at   = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    event_type   = Column(String(60))   # 'section_view'|'button_click'|'demo_step'|etc.
+    event_name   = Column(String(100))
+    event_data   = Column(Text)         # JSON serializado
+    utm_source   = Column(String(100))
+    utm_medium   = Column(String(100))
+    utm_campaign = Column(String(100))
+
+
 class Career(Base):
     """Carreiras disponíveis no Horizonte Ampliado."""
     __tablename__ = "careers"

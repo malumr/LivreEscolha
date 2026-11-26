@@ -316,3 +316,160 @@ def delete_admin_recommendation(db: Session, session_id: str):
         models.AdminRecommendation.session_id == session_id
     ).delete()
     db.commit()
+
+
+# ─── MVP DE VALIDAÇÃO COMERCIAL ───────────────────────────────────────────────
+
+def mvp_track_event(db: Session, session_id: str, event_type: str,
+                    event_name: str, event_data: str = "",
+                    utm_source: str = "", utm_medium: str = "",
+                    utm_campaign: str = ""):
+    ev = models.MVPEvent(
+        session_id=session_id, event_type=event_type,
+        event_name=event_name, event_data=event_data,
+        utm_source=utm_source, utm_medium=utm_medium,
+        utm_campaign=utm_campaign,
+    )
+    db.add(ev)
+    db.commit()
+    return ev
+
+
+def mvp_save_lead(db: Session, data: dict) -> models.MVPLead:
+    lead = models.MVPLead(**data)
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
+    return lead
+
+
+def mvp_get_stats(db: Session) -> dict:
+    total_leads   = db.query(models.MVPLead).count()
+    total_events  = db.query(models.MVPEvent).count()
+
+    # Unique sessions from events
+    unique_sessions = db.query(
+        models.MVPEvent.session_id
+    ).distinct().count()
+
+    # Intent breakdown
+    intencao  = db.query(models.MVPLead).filter(models.MVPLead.intent_level == "intencao_compra").count()
+    interesse = db.query(models.MVPLead).filter(models.MVPLead.intent_level == "interesse").count()
+
+    # Pagaria?
+    pagaria_sim    = db.query(models.MVPLead).filter(models.MVPLead.q5_pagaria == "sim").count()
+    pagaria_talvez = db.query(models.MVPLead).filter(models.MVPLead.q5_pagaria == "talvez").count()
+    pagaria_nao    = db.query(models.MVPLead).filter(models.MVPLead.q5_pagaria == "nao").count()
+
+    # Interesse em usar?
+    int_sim    = db.query(models.MVPLead).filter(models.MVPLead.q4_interesse == "sim").count()
+    int_talvez = db.query(models.MVPLead).filter(models.MVPLead.q4_interesse == "talvez").count()
+    int_nao    = db.query(models.MVPLead).filter(models.MVPLead.q4_interesse == "nao").count()
+
+    # Respondent type
+    jovens       = db.query(models.MVPLead).filter(models.MVPLead.respondent_type == "jovem").count()
+    responsaveis = db.query(models.MVPLead).filter(models.MVPLead.respondent_type == "responsavel").count()
+
+    # Device
+    mobile  = db.query(models.MVPLead).filter(models.MVPLead.device_type == "mobile").count()
+    desktop = db.query(models.MVPLead).filter(models.MVPLead.device_type == "desktop").count()
+    tablet  = db.query(models.MVPLead).filter(models.MVPLead.device_type == "tablet").count()
+
+    # UTM sources
+    utm_rows = db.execute(
+        __import__("sqlalchemy").text(
+            "SELECT utm_source, COUNT(*) as cnt FROM mvp_leads "
+            "WHERE utm_source IS NOT NULL AND utm_source != '' "
+            "GROUP BY utm_source ORDER BY cnt DESC LIMIT 10"
+        )
+    ).fetchall()
+    utm_sources = [{"source": r[0], "count": r[1]} for r in utm_rows]
+
+    # Funnel from events
+    section_views = db.query(models.MVPEvent).filter(
+        models.MVPEvent.event_type == "section_view"
+    ).count()
+    demo_starts = db.query(models.MVPEvent).filter(
+        models.MVPEvent.event_name == "demo_start"
+    ).count()
+    survey_starts = db.query(models.MVPEvent).filter(
+        models.MVPEvent.event_name == "survey_start"
+    ).count()
+
+    # q1 average
+    from sqlalchemy import func as safunc
+    q1_avg = db.query(safunc.avg(models.MVPLead.q1_autoconhecimento)).scalar() or 0
+    q2_avg = db.query(safunc.avg(models.MVPLead.q2_acredita)).scalar() or 0
+
+    # Recent leads (last 20, no personal data)
+    recent = db.query(
+        models.MVPLead.id,
+        models.MVPLead.created_at,
+        models.MVPLead.respondent_type,
+        models.MVPLead.intent_level,
+        models.MVPLead.utm_source,
+        models.MVPLead.device_type,
+        models.MVPLead.q4_interesse,
+        models.MVPLead.q5_pagaria,
+    ).order_by(models.MVPLead.created_at.desc()).limit(20).all()
+
+    return {
+        "total_leads": total_leads,
+        "total_events": total_events,
+        "unique_sessions": unique_sessions,
+        "intencao_compra": intencao,
+        "interesse": interesse,
+        "pagaria": {"sim": pagaria_sim, "talvez": pagaria_talvez, "nao": pagaria_nao},
+        "q4_interesse": {"sim": int_sim, "talvez": int_talvez, "nao": int_nao},
+        "respondent_type": {"jovem": jovens, "responsavel": responsaveis},
+        "device": {"mobile": mobile, "desktop": desktop, "tablet": tablet},
+        "utm_sources": utm_sources,
+        "funnel": {
+            "section_views": section_views,
+            "demo_starts": demo_starts,
+            "survey_starts": survey_starts,
+            "leads_submitted": total_leads,
+            "intencao_compra": intencao,
+        },
+        "avg_scores": {"q1": round(float(q1_avg), 2), "q2": round(float(q2_avg), 2)},
+        "recent_leads": [
+            {
+                "id": r[0],
+                "created_at": r[1].isoformat() if r[1] else None,
+                "respondent_type": r[2],
+                "intent_level": r[3],
+                "utm_source": r[4],
+                "device": r[5],
+                "q4_interesse": r[6],
+                "q5_pagaria": r[7],
+            }
+            for r in recent
+        ],
+    }
+
+
+def mvp_export_csv(db: Session) -> list[dict]:
+    rows = db.query(models.MVPLead).order_by(models.MVPLead.created_at.desc()).all()
+    result = []
+    for r in rows:
+        result.append({
+            "id": r.id,
+            "created_at": r.created_at.isoformat() if r.created_at else "",
+            "nome": r.nome or "",
+            "email": r.email or "",
+            "whatsapp": r.whatsapp or "",
+            "respondent_type": r.respondent_type or "",
+            "q1": r.q1_autoconhecimento or "",
+            "q2": r.q2_acredita or "",
+            "q3_atencao": r.q3_atencao or "",
+            "q4_interesse": r.q4_interesse or "",
+            "q5_pagaria": r.q5_pagaria or "",
+            "q6_objecao": r.q6_objecao or "",
+            "q7_mais_infos": "sim" if r.q7_mais_infos else "nao",
+            "intent_level": r.intent_level or "",
+            "utm_source": r.utm_source or "",
+            "utm_medium": r.utm_medium or "",
+            "utm_campaign": r.utm_campaign or "",
+            "device_type": r.device_type or "",
+        })
+    return result
