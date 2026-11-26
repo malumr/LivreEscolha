@@ -578,30 +578,70 @@ def _send_mvp_email(to: str, subject: str, html: str):
 
 
 def _mvp_confirmation_html(nome: str) -> str:
+    primeiro_nome = nome.split()[0] if nome else nome
     return f"""
-<div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px 24px;background:#f8f7ff">
-  <div style="background:#5b5fc7;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
-    <h1 style="color:#fff;margin:0;font-size:1.4rem">Livre Escolha 🧭</h1>
-    <p style="color:#c7c5ff;margin:8px 0 0;font-size:.9rem">Próximo Destino</p>
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:580px;margin:auto;padding:0;background:#f8f7ff">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 60%,#7c3aed 100%);border-radius:16px 16px 0 0;padding:32px 28px;text-align:center">
+    <div style="font-size:2rem;margin-bottom:8px">🧭</div>
+    <h1 style="color:#fff;margin:0;font-size:1.5rem;font-weight:900;letter-spacing:-.3px">Livre Escolha</h1>
+    <p style="color:#c7c5ff;margin:4px 0 0;font-size:.88rem">Programa Próximo Destino</p>
   </div>
-  <h2 style="color:#1e1b4b">Olá, {nome}! Obrigado pelo seu interesse 💜</h2>
-  <p style="color:#4a4880;line-height:1.7">
-    Recebemos suas respostas com sucesso. A equipe da <strong>Livre Escolha</strong>
-    vai entrar em contato em breve com mais informações sobre o
-    <strong>Programa Próximo Destino</strong>.
-  </p>
-  <div style="background:#eef0ff;border-radius:12px;padding:20px;margin:24px 0">
-    <p style="margin:0;color:#5b5fc7;font-weight:700;font-size:.95rem">O que esperar:</p>
-    <ul style="color:#4a4880;line-height:1.9;padding-left:20px;margin:12px 0 0">
-      <li>Acesso à jornada completa de autoconhecimento</li>
-      <li>4 módulos: Mapa Interior → Horizonte Ampliado → Rota Definida → Plano de Voo</li>
-      <li>Plano de ação personalizado para sua carreira</li>
-      <li>Tudo por apenas <strong>R$ 19,00</strong></li>
-    </ul>
+
+  <!-- Body -->
+  <div style="background:#fff;padding:32px 28px">
+    <h2 style="color:#1e1b4b;font-size:1.2rem;margin:0 0 12px">Olá, {primeiro_nome}! Sua vaga está reservada 🎉</h2>
+    <p style="color:#4a4880;line-height:1.75;margin:0 0 24px;font-size:.95rem">
+      Que ótimo ter você aqui! O <strong>Programa Próximo Destino</strong> foi criado para ajudar jovens a descobrirem sua carreira ideal com autoconhecimento real — não um simples teste vocacional.
+    </p>
+
+    <!-- Como funciona -->
+    <div style="background:#f0f1fb;border-radius:12px;padding:20px 22px;margin-bottom:24px">
+      <p style="margin:0 0 14px;color:#1e1b4b;font-weight:800;font-size:.95rem">📋 Como funciona a jornada:</p>
+      <table style="width:100%;border-collapse:collapse">
+        <tr>
+          <td style="padding:8px 0;vertical-align:top;width:32px"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:#5b5fc7;color:#fff;border-radius:50%;font-size:.78rem;font-weight:900">1</span></td>
+          <td style="padding:8px 0 8px 10px;vertical-align:top"><strong style="color:#1e1b4b;font-size:.9rem">Mapa Interior</strong><br><span style="color:#7675a0;font-size:.82rem">Perguntas curtas que revelam seus valores, preferências e estilo de trabalho</span></td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;vertical-align:top"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:#5b5fc7;color:#fff;border-radius:50%;font-size:.78rem;font-weight:900">2</span></td>
+          <td style="padding:8px 0 8px 10px;vertical-align:top"><strong style="color:#1e1b4b;font-size:.9rem">Horizonte Ampliado</strong><br><span style="color:#7675a0;font-size:.82rem">Explore mais de 100 carreiras com informações de mercado, renda e habilidades</span></td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;vertical-align:top"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:#5b5fc7;color:#fff;border-radius:50%;font-size:.78rem;font-weight:900">3</span></td>
+          <td style="padding:8px 0 8px 10px;vertical-align:top"><strong style="color:#1e1b4b;font-size:.9rem">Rota Definida</strong><br><span style="color:#7675a0;font-size:.82rem">O sistema apresenta as carreiras com maior compatibilidade com você</span></td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;vertical-align:top"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:#5b5fc7;color:#fff;border-radius:50%;font-size:.78rem;font-weight:900">4</span></td>
+          <td style="padding:8px 0 8px 10px;vertical-align:top"><strong style="color:#1e1b4b;font-size:.9rem">Plano de Voo</strong><br><span style="color:#7675a0;font-size:.82rem">Um plano de ação com 6 passos concretos do ensino médio à entrada no mercado</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Preço e CTA -->
+    <div style="background:linear-gradient(135deg,#ede9ff,#f0f1ff);border:2px solid #c7c5ff;border-radius:14px;padding:22px 24px;text-align:center;margin-bottom:24px">
+      <p style="margin:0 0 4px;color:#7675a0;font-size:.8rem;text-transform:uppercase;letter-spacing:.8px">Acesso completo</p>
+      <p style="margin:0 0 4px;font-size:2.4rem;font-weight:900;color:#5b5fc7;line-height:1">R$&nbsp;19<span style="font-size:1rem;font-weight:400">,00</span></p>
+      <p style="margin:0 0 18px;color:#7675a0;font-size:.82rem">pagamento único · acesso por 6 meses</p>
+      <a href="https://livreescolha.vercel.app" style="display:inline-block;background:#5b5fc7;color:#fff;text-decoration:none;padding:13px 28px;border-radius:10px;font-weight:800;font-size:.95rem">
+        Acessar o Programa Próximo Destino →
+      </a>
+      <p style="margin:12px 0 0;color:#a8a6cc;font-size:.75rem">Sem cobrança agora — estamos abrindo o acesso em breve.</p>
+    </div>
+
+    <p style="color:#4a4880;font-size:.9rem;line-height:1.7">
+      Assim que o acesso abrir oficialmente, você será avisado por aqui com o link direto para garantir sua vaga. Fique de olho na caixa de entrada! 👀
+    </p>
   </div>
-  <p style="color:#7675a0;font-size:.82rem;margin-top:24px">
-    Livre Escolha · São Caetano do Sul, SP · <a href="https://livreescolha.vercel.app" style="color:#5b5fc7">livreescolha.vercel.app</a>
-  </p>
+
+  <!-- Footer -->
+  <div style="background:#f8f7ff;border-radius:0 0 16px 16px;padding:20px 28px;text-align:center;border-top:1px solid #dde0f7">
+    <p style="margin:0;color:#7675a0;font-size:.8rem">
+      <strong style="color:#5b5fc7">Livre Escolha</strong> · São Caetano do Sul, SP<br>
+      Dados protegidos pela LGPD · <a href="https://livreescolha.vercel.app" style="color:#5b5fc7;text-decoration:none">livreescolha.vercel.app</a>
+    </p>
+  </div>
 </div>"""
 
 

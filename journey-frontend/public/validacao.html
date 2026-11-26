@@ -225,7 +225,7 @@ footer p{font-size:.82rem;color:#7675a0;margin-top:8px}
     <h1>Ajude o jovem a descobrir<br>sua <em>carreira ideal</em></h1>
     <p>Uma jornada de autoconhecimento que transforma dúvida em decisão — com plano de ação real.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="scrollTo('#survey-section')" id="btn-hero-cta">Quero conhecer agora</button>
+      <button class="btn-primary" onclick="scrollTo('#sec-pricing')" id="btn-hero-cta">Quero conhecer agora</button>
       <button class="btn-ghost" onclick="scrollTo('#demo-section')" id="btn-hero-demo">Ver como funciona</button>
     </div>
     <div class="stat-row">
@@ -358,7 +358,7 @@ footer p{font-size:.82rem;color:#7675a0;margin-top:8px}
           <li>Dashboard com seu progresso</li>
           <li>Dados protegidos (LGPD)</li>
         </ul>
-        <button class="price-cta" onclick="scrollTo('#lead-section')" id="btn-price-cta">Quero meu acesso →</button>
+        <button class="price-cta" onclick="openAccessModal()" id="btn-price-cta">Quero meu acesso →</button>
         <div class="price-note">Sem cobrança agora — estamos validando o interesse antes do lançamento.</div>
       </div>
     </div>
@@ -548,6 +548,30 @@ footer p{font-size:.82rem;color:#7675a0;margin-top:8px}
     <p style="margin-top:4px">Dados protegidos pela LGPD · © 2026</p>
   </div>
 </footer>
+
+<!-- ACCESS MODAL -->
+<div id="access-modal" style="display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;padding:16px;background:rgba(15,14,26,.7);backdrop-filter:blur(4px)">
+  <div style="background:var(--surf);border:1.5px solid var(--bdr);border-radius:20px;max-width:420px;width:100%;padding:32px 28px;box-shadow:0 12px 48px rgba(0,0,0,.3);position:relative">
+    <button onclick="closeAccessModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.3rem;color:var(--fg3);cursor:pointer;line-height:1">×</button>
+    <div style="font-size:1.6rem;margin-bottom:10px">🎯</div>
+    <h2 style="font-family:var(--font-d);font-weight:900;font-size:1.3rem;color:var(--fg);margin-bottom:6px">Reserve seu acesso</h2>
+    <p style="font-size:.88rem;color:var(--fg2);margin-bottom:22px;line-height:1.5">Informe seu nome e e-mail para receber as instruções de como acessar o <strong>Programa Próximo Destino</strong> por R$&nbsp;19,00.</p>
+    <div id="access-form-wrap">
+      <div class="form-group"><label for="am-nome">Seu nome *</label><input type="text" id="am-nome" placeholder="Ex: Ana Lima" autocomplete="name"></div>
+      <div class="form-group"><label for="am-email">E-mail *</label><input type="email" id="am-email" placeholder="seu@email.com" autocomplete="email"></div>
+      <span class="field-error" id="am-err" style="margin-bottom:12px;display:none">Preencha nome e e-mail válidos.</span>
+      <button onclick="submitAccessModal()" id="am-btn" style="width:100%;background:var(--p);color:#fff;border:none;border-radius:12px;padding:14px;font-family:var(--font-b);font-weight:800;font-size:1rem;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px">
+        <span id="am-txt">Receber instruções de acesso →</span>
+        <span id="am-spin" style="display:none;width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></span>
+      </button>
+    </div>
+    <div id="am-success" style="display:none;text-align:center;padding:10px 0">
+      <div style="font-size:2.5rem;margin-bottom:10px">📧</div>
+      <div style="font-weight:700;font-size:1rem;color:var(--fg);margin-bottom:6px">E-mail enviado!</div>
+      <div style="font-size:.88rem;color:var(--fg2)">Verifique sua caixa de entrada (e o spam). As instruções de acesso estão a caminho.</div>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -786,6 +810,59 @@ document.getElementById("lead-form").addEventListener("submit", async function(e
   trackEvent("form_submit", "lead_submitted", { intent: selectedIntent });
   btn.disabled = false; btn.classList.remove("loading");
 });
+
+// ── ACCESS MODAL ──────────────────────────────────────────────────
+function openAccessModal() {
+  const m = document.getElementById("access-modal");
+  m.style.display = "flex";
+  document.getElementById("am-nome").focus();
+  trackEvent("button_click", "open_access_modal");
+}
+function closeAccessModal() {
+  document.getElementById("access-modal").style.display = "none";
+  document.getElementById("am-success").style.display = "none";
+  document.getElementById("access-form-wrap").style.display = "block";
+  document.getElementById("am-err").style.display = "none";
+}
+document.getElementById("access-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeAccessModal();
+});
+
+async function submitAccessModal() {
+  const nome  = document.getElementById("am-nome").value.trim();
+  const email = document.getElementById("am-email").value.trim();
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!nome || !emailOk) {
+    document.getElementById("am-err").style.display = "block"; return;
+  }
+  document.getElementById("am-err").style.display = "none";
+  document.getElementById("am-btn").disabled = true;
+  document.getElementById("am-txt").style.display = "none";
+  document.getElementById("am-spin").style.display = "inline-block";
+
+  try {
+    await fetch(API + "/mvp/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: SESSION_ID, nome, email,
+        respondent_type: "jovem",
+        intent_level: "intencao_compra",
+        q7_mais_infos: true,
+        device_type: getDevice(),
+        lgpd_consent: true,
+        ...UTM,
+      }),
+    });
+  } catch {}
+
+  document.getElementById("access-form-wrap").style.display = "none";
+  document.getElementById("am-success").style.display = "block";
+  trackEvent("form_submit", "access_modal_submitted");
+  document.getElementById("am-btn").disabled = false;
+  document.getElementById("am-txt").style.display = "inline";
+  document.getElementById("am-spin").style.display = "none";
+}
 
 // ── INIT ───────────────────────────────────────────────────────────
 trackEvent("page_view", "landing_page_loaded", { device: getDevice(), ...UTM });
