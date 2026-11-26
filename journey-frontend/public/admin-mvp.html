@@ -228,15 +228,22 @@ async function loadData() {
   document.getElementById("status-bar").classList.remove("show");
 
   try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 20000);
     const res = await fetch(API + "/mvp/stats", {
-      headers: { "X-Admin-Key": ADMIN_KEY }
+      headers: { "X-Admin-Key": ADMIN_KEY },
+      signal: ctrl.signal
     });
+    clearTimeout(timer);
     if (!res.ok) throw new Error("HTTP " + res.status);
     const d = await res.json();
     renderDashboard(d);
     document.getElementById("last-updated").textContent = "Atualizado: " + new Date().toLocaleTimeString("pt-BR");
   } catch (err) {
-    showStatus("Não foi possível carregar dados. Verifique a conexão com a API (" + err.message + ")");
+    const msg = err.name === "AbortError"
+      ? "Backend demorando para responder (Render free tier está acordando). Aguarde 30s e clique em Atualizar."
+      : "Não foi possível carregar dados. (" + err.message + ")";
+    showStatus(msg);
   } finally {
     document.getElementById("loading-screen").classList.remove("show");
     document.getElementById("dashboard").style.display = "block";
