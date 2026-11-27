@@ -85,6 +85,17 @@ try:
 except Exception:
     pass
 
+# Migração: amplia respondent_type para VARCHAR(50)
+try:
+    from database import engine as _engine
+    with _engine.connect() as _conn:
+        _conn.execute(__import__("sqlalchemy").text(
+            "ALTER TABLE mvp_leads ALTER COLUMN respondent_type TYPE VARCHAR(50)"
+        ))
+        _conn.commit()
+except Exception:
+    pass
+
 app = FastAPI(
     title="Sua Jornada API",
     description="Backend para o app de desenvolvimento de carreira",
