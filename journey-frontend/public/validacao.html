@@ -181,14 +181,11 @@ h2.section-h{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;let
 .intro-title{font-size:clamp(32px,6vw,52px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;color:#f8fafc}
 .intro-title b{color:#818cf8}
 .intro-sub{font-size:17px;line-height:1.7;color:#94a3b8}
-.team-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:480px}
-.team-card{background:var(--surf);border:1px solid var(--bdr);border-radius:18px;padding:24px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
-.team-avatar{width:64px;height:64px;border-radius:50%;background:var(--p-light);display:flex;align-items:center;justify-content:center;font-size:28px}
-.team-name{font-size:15px;font-weight:800;color:var(--fg)}
-.team-role{font-size:12px;font-weight:600;color:var(--p);text-transform:uppercase;letter-spacing:1px}
-.team-bio{font-size:13px;color:var(--fg3);line-height:1.5;margin-top:4px}
 .mission-card{background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:28px 32px;display:flex;flex-direction:column;gap:12px}
-@media(max-width:460px){.team-grid{grid-template-columns:1fr}.team-card{padding:20px}}
+.founders-block{background:var(--surf);border:1px solid var(--bdr);border-radius:20px;overflow:hidden}
+.founders-photo{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:top;display:block}
+.founders-caption{padding:24px 28px;display:flex;flex-direction:column;gap:14px}
+.founders-caption p{font-size:15px;color:var(--fg2);line-height:1.75}
 
 @media(max-width:480px){
   .rating{gap:4px}
@@ -222,18 +219,11 @@ h2.section-h{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;let
     </div>
     <div>
       <p style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fg3);margin-bottom:14px">Quem criou o Próximo Destino</p>
-      <div class="team-grid">
-        <div class="team-card">
-          <div class="team-avatar">👩‍💼</div>
-          <span class="team-name">Lilian Nakaya</span>
-          <span class="team-role">Co-fundadora</span>
-          <span class="team-bio">Expertise em RH e gestão de pessoas, dedicada a capacitar jovens a construírem carreiras com clareza e autonomia.</span>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar">👩‍💼</div>
-          <span class="team-name">Vanessa Gazel</span>
-          <span class="team-role">Co-fundadora</span>
-          <span class="team-bio">Especialista em futuro do trabalho, traduz tendências de mercado em planos de ação concretos para jovens profissionais.</span>
+      <div class="founders-block">
+        <img class="founders-photo" src="fundadoras.webp" alt="Lilian Nakaya e Vanessa Gazel, co-fundadoras da Livre Escolha">
+        <div class="founders-caption">
+          <p>Na Livre Escolha, <strong>Lilian Nakaya</strong> e <strong>Vanessa Gazel</strong> dedicam sua expertise em RH, gestão de pessoas e o futuro do trabalho para capacitar jovens — desde o ensino médio até universitários — que estão se preparando para suas primeiras escolhas de futuro. Nosso foco é claro: ajudá-los a construir carreiras com clareza, significado e autonomia.</p>
+          <p>Na Livre Escolha, desafiamos a ideia de que o sucesso tem uma única fórmula. É por isso que nosso método se fundamenta na <strong>Simplicidade, Pluralidade e Autonomia</strong>. Aqui, incertezas se transformam em um leque de possibilidades, e dúvidas em planos de ação concretos para o seu futuro.</p>
         </div>
       </div>
     </div>
