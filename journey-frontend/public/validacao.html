@@ -181,13 +181,14 @@ h2.section-h{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;let
 .intro-title{font-size:clamp(32px,6vw,52px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;color:#f8fafc}
 .intro-title b{color:#818cf8}
 .intro-sub{font-size:17px;line-height:1.7;color:#94a3b8}
-.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.team-card{background:var(--surf);border:1px solid var(--bdr);border-radius:18px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.team-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:480px}
+.team-card{background:var(--surf);border:1px solid var(--bdr);border-radius:18px;padding:24px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
 .team-avatar{width:64px;height:64px;border-radius:50%;background:var(--p-light);display:flex;align-items:center;justify-content:center;font-size:28px}
 .team-name{font-size:15px;font-weight:800;color:var(--fg)}
-.team-role{font-size:13px;color:var(--fg3)}
+.team-role{font-size:12px;font-weight:600;color:var(--p);text-transform:uppercase;letter-spacing:1px}
+.team-bio{font-size:13px;color:var(--fg3);line-height:1.5;margin-top:4px}
 .mission-card{background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:28px 32px;display:flex;flex-direction:column;gap:12px}
-@media(max-width:460px){.team-grid{grid-template-columns:repeat(2,1fr)}.team-card{padding:14px 8px}.team-avatar{width:48px;height:48px;font-size:22px}.team-name{font-size:13px}}
+@media(max-width:460px){.team-grid{grid-template-columns:1fr}.team-card{padding:20px}}
 
 @media(max-width:480px){
   .rating{gap:4px}
@@ -210,9 +211,9 @@ h2.section-h{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;let
   <!-- TELA INTRO: SOBRE O PROJETO -->
   <div class="screen active" id="sint">
     <div class="intro-hero">
-      <span class="intro-tag">Projeto de Extensão · USCS · Ciência da Computação 6AN</span>
+      <span class="intro-tag">LivreEscolha · Próximo Destino</span>
       <h1 class="intro-title">A escolha profissional não precisa ser feita <b>no escuro</b></h1>
-      <p class="intro-sub">O Próximo Destino nasceu como um Projeto de Extensão da USCS para digitalizar e escalar o programa de orientação vocacional da startup Livre Escolha — levando mais adolescentes a descobrirem seu caminho com informação, autoconhecimento e um plano real.</p>
+      <p class="intro-sub">A Livre Escolha acredita que o sucesso não tem uma única fórmula. Por isso criamos o Próximo Destino: um programa para transformar incertezas em possibilidades e dúvidas em planos de ação concretos.</p>
     </div>
     <div class="mission-card">
       <p style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--p)">Nossa missão</p>
@@ -220,37 +221,19 @@ h2.section-h{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;let
       <p style="font-size:16px;color:var(--fg2);line-height:1.65">O diagnóstico que você vai fazer a seguir não diz qual profissão escolher. Ele mostra onde você já está e o que ainda pode desenvolver antes de tomar essa decisão.</p>
     </div>
     <div>
-      <p style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fg3);margin-bottom:14px">Equipe — Ciência da Computação 6AN · USCS</p>
+      <p style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fg3);margin-bottom:14px">Quem criou o Próximo Destino</p>
       <div class="team-grid">
         <div class="team-card">
-          <div class="team-avatar">👩‍💻</div>
-          <span class="team-name">Isabela Orçati</span>
-          <span class="team-role">Desenvolvedora</span>
+          <div class="team-avatar">👩‍💼</div>
+          <span class="team-name">Lilian Nakaya</span>
+          <span class="team-role">Co-fundadora</span>
+          <span class="team-bio">Expertise em RH e gestão de pessoas, dedicada a capacitar jovens a construírem carreiras com clareza e autonomia.</span>
         </div>
         <div class="team-card">
-          <div class="team-avatar">👩‍💻</div>
-          <span class="team-name">Manuela Fideles</span>
-          <span class="team-role">Desenvolvedora</span>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar">👩‍💻</div>
-          <span class="team-name">Maria Fernanda</span>
-          <span class="team-role">Desenvolvedora</span>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar">👩‍💻</div>
-          <span class="team-name">Maria Luiza Matos</span>
-          <span class="team-role">Desenvolvedora</span>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar">👩‍💻</div>
-          <span class="team-name">Mariana Gama</span>
-          <span class="team-role">Desenvolvedora</span>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar">👩‍💻</div>
-          <span class="team-name">Marina Cristini</span>
-          <span class="team-role">Desenvolvedora</span>
+          <div class="team-avatar">👩‍💼</div>
+          <span class="team-name">Vanessa Gazel</span>
+          <span class="team-role">Co-fundadora</span>
+          <span class="team-bio">Especialista em futuro do trabalho, traduz tendências de mercado em planos de ação concretos para jovens profissionais.</span>
         </div>
       </div>
     </div>
