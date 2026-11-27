@@ -8,9 +8,11 @@ from sqlalchemy.orm import sessionmaker
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./journey.db")
 
 # O Render entrega URLs PostgreSQL com prefixo "postgres://", mas o SQLAlchemy
-# exige "postgresql://". Esta linha corrige automaticamente.
+# exige "postgresql://". Força o driver psycopg v3 explicitamente.
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and "+psycopg" not in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 # SQLite precisa do argumento check_same_thread; PostgreSQL não aceita isso.
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
