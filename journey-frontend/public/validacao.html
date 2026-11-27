@@ -175,6 +175,20 @@ h2.section-h{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;let
 .status-msg.err{background:var(--err-bg);color:var(--err);display:block}
 .status-msg.ok{background:var(--ok-bg);color:var(--ok);display:block}
 
+/* INTRO */
+.intro-hero{background:#0f172a;border-radius:24px;padding:36px 32px;display:flex;flex-direction:column;gap:12px}
+.intro-tag{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#818cf8}
+.intro-title{font-size:clamp(32px,6vw,52px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;color:#f8fafc}
+.intro-title b{color:#818cf8}
+.intro-sub{font-size:17px;line-height:1.7;color:#94a3b8}
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.team-card{background:var(--surf);border:1px solid var(--bdr);border-radius:18px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.team-avatar{width:64px;height:64px;border-radius:50%;background:var(--p-light);display:flex;align-items:center;justify-content:center;font-size:28px}
+.team-name{font-size:15px;font-weight:800;color:var(--fg)}
+.team-role{font-size:13px;color:var(--fg3)}
+.mission-card{background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:28px 32px;display:flex;flex-direction:column;gap:12px}
+@media(max-width:460px){.team-grid{grid-template-columns:repeat(3,1fr)}.team-card{padding:14px 8px}.team-avatar{width:48px;height:48px;font-size:22px}.team-name{font-size:13px}}
+
 @media(max-width:480px){
   .rating{gap:4px}
   .r-btn{padding:10px 2px;border-radius:9px}
@@ -193,8 +207,43 @@ h2.section-h{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;let
 
 <div class="wrap">
 
+  <!-- TELA INTRO: SOBRE O PROJETO -->
+  <div class="screen active" id="sint">
+    <div class="intro-hero">
+      <span class="intro-tag">LivreEscolha · Próximo Destino</span>
+      <h1 class="intro-title">A escolha profissional não precisa ser feita <b>no escuro</b></h1>
+      <p class="intro-sub">Criamos o Próximo Destino porque vivemos na pele a dificuldade de escolher uma carreira sem informação, sem autoconhecimento e sem um plano real.</p>
+    </div>
+    <div class="mission-card">
+      <p style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--p)">Nossa missão</p>
+      <p style="font-size:18px;font-weight:800;color:var(--fg);line-height:1.4">Transformar a dúvida sobre o futuro em descoberta — para cada jovem brasileiro, independente de onde veio.</p>
+      <p style="font-size:16px;color:var(--fg2);line-height:1.65">O diagnóstico que você vai fazer a seguir não diz qual profissão escolher. Ele mostra onde você já está e o que ainda pode desenvolver antes de tomar essa decisão.</p>
+    </div>
+    <div>
+      <p style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fg3);margin-bottom:14px">Quem faz o Próximo Destino</p>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-avatar">👩‍💻</div>
+          <span class="team-name">[Nome]</span>
+          <span class="team-role">[Papel]</span>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">👩‍🎨</div>
+          <span class="team-name">[Nome]</span>
+          <span class="team-role">[Papel]</span>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">👩‍💼</div>
+          <span class="team-name">[Nome]</span>
+          <span class="team-role">[Papel]</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="goScreen(0)">Fazer o diagnóstico →</button>
+  </div>
+
   <!-- TELA 0: ABERTURA -->
-  <div class="screen active" id="s0">
+  <div class="screen" id="s0">
     <div class="badge"><span>Livre</span>Escolha · Próximo Destino</div>
     <h1 class="title">Estou pronto<br>para escolher?</h1>
     <p class="lead">Antes de escolher uma profissão, existem algumas coisas importantes que você precisa conseguir fazer: conhecer suas características e preferências, analisar informações e conhecer as possibilidades que existem.</p>
@@ -312,9 +361,9 @@ h2.section-h{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;let
       <input class="form-input" id="inp-name" type="text" placeholder="Como você se chama?" autocomplete="given-name">
     </div>
     <div class="form-group">
-      <label class="form-label" for="inp-guardian">E-mail do seu responsável</label>
-      <input class="form-input" id="inp-guardian" type="email" placeholder="email@responsavel.com" autocomplete="email">
-      <span class="form-hint">Vamos enviar um convite explicando o programa. Seus dados de diagnóstico ficam salvos.</span>
+      <label class="form-label" for="inp-guardian">Seu e-mail ou do seu responsável</label>
+      <input class="form-input" id="inp-guardian" type="email" placeholder="email@exemplo.com" autocomplete="email">
+      <span class="form-hint">Se você for menor de idade, informe o e-mail de um responsável — vamos enviar a ele um convite para liberar o acesso. Se for maior de 18 anos, pode usar o seu próprio.</span>
     </div>
     <p id="form-status" class="status-msg"></p>
     <button class="btn btn-indigo btn-block" id="btn-send" onclick="sendInvite()">Enviar convite ao responsável →</button>
@@ -563,22 +612,22 @@ async function sendInvite() {
   } catch (err) {
     btn.disabled = false;
     btn.textContent = 'Enviar convite ao responsável →';
-    if (err.name === 'AbortError') {
-      statusEl.className = 'status-msg err';
-      statusEl.textContent = 'O servidor está demorando para responder. Tente novamente em instantes.';
-    } else {
-      // Offline fallback: still move forward (graceful degradation)
-      goScreen(7);
-    }
+    // Sempre avança — salvo ou não no servidor
+    goScreen(7);
   }
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
-const stepLabels = ['', 'Parte 1 de 3', 'Parte 2 de 3', 'Parte 3 de 3', 'Resultado', '', 'Continuar', ''];
+const stepLabels = {
+  0: '', 1: 'Parte 1 de 3', 2: 'Parte 2 de 3',
+  3: 'Parte 3 de 3', 4: 'Resultado', 5: '', 6: '', 7: '',
+};
 
 function goScreen(n) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const target = document.getElementById('s' + n);
+  // 'sint' = intro, numbers = steps
+  const id = (n === -1) ? 'sint' : 's' + n;
+  const target = document.getElementById(id);
   if (target) {
     target.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
