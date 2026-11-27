@@ -167,7 +167,7 @@ class MVPLead(Base):
     nome            = Column(String(150))
     email           = Column(String(255), index=True)
     whatsapp        = Column(String(30))
-    respondent_type = Column(String(20))   # 'jovem' | 'responsavel'
+    respondent_type = Column(String(50))
     # Pesquisa de aceitação
     q1_autoconhecimento = Column(Integer)  # 1-5
     q2_acredita         = Column(Integer)  # 1-5
