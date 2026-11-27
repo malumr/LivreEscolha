@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Próximo Destino — Área do Responsável</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap">
+<style>
+:root{
+  --p:#6366f1;--p2:#4f46e5;--p-light:#eef2ff;
+  --fg:#0f172a;--fg2:#475569;--fg3:#94a3b8;
+  --surf:#fff;--bdr:#e2e8f0;
+  --ok:#059669;--ok-bg:#ecfdf5;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:linear-gradient(160deg,#eef2ff 0%,#f0f4ff 50%,#e8eeff 100%) fixed;
+  color:var(--fg);min-height:100vh;
+}
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,255,255,.88);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bdr);height:60px;
+  display:flex;align-items:center;
+  padding:0 max(20px,env(safe-area-inset-left,0px));
+}
+.nav-brand{font-weight:800;font-size:19px;letter-spacing:-.5px}
+.nav-brand b{color:var(--p)}
+.wrap{max-width:680px;margin:0 auto;padding:52px max(20px,env(safe-area-inset-left,0px)) 80px;display:flex;flex-direction:column;gap:32px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--p)}
+h1{font-size:clamp(32px,5vw,48px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-top:4px}
+.lead{font-size:17px;line-height:1.75;color:var(--fg2)}
+h2{font-size:28px;font-weight:800;letter-spacing:-.5px}
+
+/* WHAT SECTION */
+.what-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.what-card{background:var(--surf);border:1px solid var(--bdr);border-radius:18px;padding:24px}
+.what-num{font-size:36px;font-weight:800;color:var(--p-light);letter-spacing:-1px;line-height:1}
+.what-title{font-size:18px;font-weight:800;color:var(--fg);margin:8px 0 4px}
+.what-desc{font-size:14px;color:var(--fg2);line-height:1.6}
+.what-tag{display:inline-block;background:var(--p-light);color:var(--p);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;margin-top:8px}
+
+/* ROLE SPLIT */
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.role-card{background:var(--surf);border:1px solid var(--bdr);border-radius:18px;padding:20px 22px}
+.role-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fg3);margin-bottom:10px}
+.role-items{display:flex;flex-direction:column;gap:6px}
+.role-item{font-size:14px;color:var(--fg2);display:flex;align-items:flex-start;gap:8px}
+.role-item::before{content:"·";color:var(--p);font-weight:800;flex-shrink:0}
+
+/* OFFER */
+.offer{background:var(--surf);border:2px solid var(--bdr);border-radius:24px;padding:36px;box-shadow:0 8px 40px rgba(99,102,241,.1)}
+.offer-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.offer-price-block{}
+.offer-label{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--fg3);margin-bottom:6px}
+.offer-price{font-size:72px;font-weight:800;letter-spacing:-3px;line-height:1;color:var(--fg)}
+.offer-period{font-size:14px;color:var(--fg3);margin-top:4px}
+.offer-feat{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.offer-feat li{font-size:15px;color:var(--fg2);display:flex;align-items:center;gap:10px}
+.offer-feat li::before{content:"✓";color:var(--ok);font-weight:800;font-size:14px}
+
+/* CTA */
+.cta-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:18px 32px;background:var(--fg);color:#fff;
+  border:none;border-radius:14px;width:100%;
+  font-family:'DM Sans',system-ui,sans-serif;font-size:17px;font-weight:800;
+  cursor:pointer;transition:all .15s;text-decoration:none;margin-top:24px;
+}
+.cta-btn:hover{background:#1e293b;transform:translateY(-1px)}
+.cta-btn.indigo{background:var(--p)}
+.cta-btn.indigo:hover{background:var(--p2)}
+.cta-note{font-size:13px;color:var(--fg3);text-align:center;margin-top:8px}
+
+/* TRUST */
+.trust{display:flex;gap:20px;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--fg2)}
+.trust-icon{font-size:18px}
+
+@media(max-width:520px){
+  .what-grid,.roles{grid-template-columns:1fr}
+  .offer-top{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">Livre<b>Escolha</b></span>
+</nav>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <div>
+    <p class="eyebrow" id="teen-name-label">Seu filho(a) quer continuar a jornada</p>
+    <h1>Próximo Destino</h1>
+    <p class="lead" style="margin-top:12px">Um programa para ajudá-lo a se conhecer, ampliar suas possibilidades e tomar decisões profissionais com mais informação e segurança.</p>
+  </div>
+
+  <!-- O que ele vai viver -->
+  <div>
+    <h2 style="margin-bottom:20px">O que ele vai viver</h2>
+    <div class="what-grid">
+      <div class="what-card">
+        <div class="what-num">01</div>
+        <p class="what-title">Autoconhecimento</p>
+        <p class="what-desc">Vai compreender melhor seus conhecimentos, habilidades, interesses e preferências.</p>
+        <span class="what-tag">Mapa Interior</span>
+      </div>
+      <div class="what-card">
+        <div class="what-num">02</div>
+        <p class="what-title">Exploração</p>
+        <p class="what-desc">Vai conhecer profissões, formações, ambientes e diferentes possibilidades de trabalho.</p>
+        <span class="what-tag">Horizonte Ampliado</span>
+      </div>
+      <div class="what-card">
+        <div class="what-num">03</div>
+        <p class="what-title">Experimentação</p>
+        <p class="what-desc">Vai investigar e experimentar possibilidades antes de tomar decisões.</p>
+        <span class="what-tag">Rota Definida</span>
+      </div>
+      <div class="what-card">
+        <div class="what-num">04</div>
+        <p class="what-title">Construção da escolha</p>
+        <p class="what-desc">Vai reunir informações sobre si e sobre o mundo profissional para construir seus próprios critérios.</p>
+        <span class="what-tag">Plano de Voo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Qual é o seu papel -->
+  <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:28px 32px">
+    <p style="font-size:18px;font-weight:800;color:var(--fg);margin-bottom:8px">E qual é o seu papel?</p>
+    <p style="font-size:16px;color:var(--fg2);line-height:1.6">Você não precisa escolher uma profissão pelo seu filho. Pode oferecer a ele algo ainda mais importante: a oportunidade de começar a construir essa escolha por conta própria.</p>
+  </div>
+
+  <!-- Separação de papéis -->
+  <div>
+    <h2 style="margin-bottom:16px">Como funciona</h2>
+    <div class="roles">
+      <div class="role-card">
+        <p class="role-label">Adolescente</p>
+        <div class="role-items">
+          <div class="role-item">Já realizou o diagnóstico inicial</div>
+          <div class="role-item">Manifesta interesse em continuar</div>
+          <div class="role-item">Realiza a jornada completa</div>
+          <div class="role-item">Constrói suas descobertas</div>
+        </div>
+      </div>
+      <div class="role-card">
+        <p class="role-label">Responsável (você)</p>
+        <div class="role-items">
+          <div class="role-item">Conhece o programa e a oferta</div>
+          <div class="role-item">Realiza as autorizações</div>
+          <div class="role-item">Realiza a contratação</div>
+          <div class="role-item">Recebe informações do programa</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Oferta -->
+  <div class="offer">
+    <div class="offer-top">
+      <div class="offer-price-block">
+        <p class="offer-label">Acesso completo — Próximo Destino</p>
+        <div class="offer-price">R$19</div>
+        <p class="offer-period">pagamento único · acesso por 6 meses</p>
+      </div>
+    </div>
+    <ul class="offer-feat">
+      <li>4 módulos completos da jornada</li>
+      <li>Motor de recomendação personalizado</li>
+      <li>100+ carreiras detalhadas</li>
+      <li>Plano de ação com 6 passos concretos</li>
+      <li>Dashboard de progresso</li>
+    </ul>
+    <a href="https://livreescolha.vercel.app" class="cta-btn indigo" id="purchase-btn">
+      Começar essa jornada com ele →
+    </a>
+    <p class="cta-note">Dados protegidos · LGPD compliant</p>
+  </div>
+
+  <!-- Trust items -->
+  <div class="trust">
+    <div class="trust-item"><span class="trust-icon">🔒</span>Dados de menores protegidos (LGPD)</div>
+    <div class="trust-item"><span class="trust-icon">📱</span>Funciona em qualquer celular</div>
+    <div class="trust-item"><span class="trust-icon">✅</span>Plataforma já em operação</div>
+  </div>
+
+</div>
+
+<script>
+// Personalizar com nome do adolescente via URL param
+const params = new URLSearchParams(location.search);
+const name = params.get('nome');
+if (name) {
+  document.getElementById('teen-name-label').textContent =
+    name + ' quer continuar a jornada';
+}
+</script>
+</body>
+</html>

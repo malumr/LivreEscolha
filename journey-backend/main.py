@@ -693,6 +693,75 @@ def mvp_submit_lead(payload: dict, db: Session = Depends(get_db)):
     return {"ok": True, "id": lead.id}
 
 
+@app.post("/mvp/diagnostic", tags=["mvp"])
+def mvp_submit_diagnostic(payload: dict, db: Session = Depends(get_db)):
+    """Salva resultado do diagnóstico e envia convite ao responsável."""
+    nome = payload.get("nome", "").strip()
+    guardian_email = payload.get("guardian_email", "").strip()
+    s1 = payload.get("diag_score_autoconhecimento")
+    s2 = payload.get("diag_score_pensamento_critico")
+    s3 = payload.get("diag_score_profissoes")
+
+    # Persiste como lead com campos extras
+    lead_data = {
+        "session_id": payload.get("session_id", "diag_" + str(__import__("time").time())),
+        "nome": nome,
+        "email": guardian_email,
+        "respondent_type": "adolescente_diagnostico",
+        "intent_level": "guardian_invite",
+        "lgpd_consent": payload.get("lgpd_consent", False),
+    }
+    lead = crud.mvp_save_lead(db, lead_data)
+
+    # E-mail de convite ao responsável
+    if guardian_email:
+        resp_url = f"{FRONTEND_URL}/responsavel.html?nome={__import__('urllib.parse', fromlist=['quote']).parse.quote(nome)}&ref={lead.id}"
+        _send_mvp_email(
+            guardian_email,
+            f"{nome} quer continuar a jornada do Próximo Destino",
+            _guardian_invite_html(nome, resp_url),
+        )
+
+    # Notificação ao admin
+    if ADMIN_EMAIL:
+        axis_names = {1: "Autoconhecimento", 2: "Pensamento Crítico", 3: "Profissões e Mercado"}
+        scores_txt = f"AC={s1} · PC={s2} · PM={s3}" if all(x is not None for x in [s1, s2, s3]) else "sem scores"
+        _send_mvp_email(
+            ADMIN_EMAIL,
+            f"Diagnóstico concluído: {nome} ({scores_txt})",
+            f"<pre>Nome: {nome}\nResponsável: {guardian_email}\nScores: {scores_txt}\nLead ID: {lead.id}</pre>",
+        )
+
+    return {"ok": True, "id": lead.id}
+
+
+def _guardian_invite_html(nome: str, resp_url: str) -> str:
+    pn = nome.split()[0] if nome else nome
+    return f"""
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:580px;margin:auto;background:#f0f4ff">
+  <div style="background:#0f172a;border-radius:16px 16px 0 0;padding:32px 28px;text-align:center">
+    <h1 style="color:#fff;margin:0;font-size:1.5rem;font-weight:900">LivreEscolha</h1>
+    <p style="color:#818cf8;margin:4px 0 0;font-size:.9rem">Programa Próximo Destino</p>
+  </div>
+  <div style="background:#fff;padding:32px 28px">
+    <h2 style="color:#0f172a;font-size:1.2rem;margin:0 0 16px">{nome} quer continuar a jornada do Próximo Destino</h2>
+    <p style="color:#475569;line-height:1.75;margin:0 0 20px;font-size:.95rem">
+      Ele(a) realizou o diagnóstico inicial e agora pode continuar explorando interesses, habilidades, possibilidades profissionais e próximos passos.
+    </p>
+    <div style="background:#eef2ff;border-radius:12px;padding:20px 22px;margin-bottom:24px;text-align:center">
+      <p style="margin:0 0 4px;color:#94a3b8;font-size:.8rem;text-transform:uppercase;letter-spacing:1px">Acesso completo</p>
+      <p style="margin:0;font-size:2.4rem;font-weight:900;color:#0f172a;line-height:1">R$&nbsp;19<span style="font-size:1rem;font-weight:400">,00</span></p>
+      <p style="margin:4px 0 0;color:#94a3b8;font-size:.8rem">pagamento único · acesso por 6 meses</p>
+    </div>
+    <a href="{resp_url}"
+       style="display:block;background:#6366f1;color:#fff;text-decoration:none;padding:15px 28px;border-radius:12px;font-weight:800;font-size:.95rem;text-align:center;margin-bottom:16px">
+      Conhecer o Próximo Destino →
+    </a>
+    <p style="color:#94a3b8;font-size:.8rem;text-align:center">Dados protegidos pela LGPD · livreescolha.vercel.app</p>
+  </div>
+</div>"""
+
+
 @app.get("/mvp/stats", tags=["mvp"], dependencies=[Depends(verify_admin)])
 def mvp_get_stats(db: Session = Depends(get_db)):
     """Retorna métricas do MVP para o dashboard administrativo."""
